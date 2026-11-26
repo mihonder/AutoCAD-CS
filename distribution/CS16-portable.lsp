@@ -1,0 +1,75 @@
+;; Generated release is one self-contained APPLOAD file. No source-folder lookup,
+;; search-path changes, registry edits, downloads or external executables.
+(vl-load-com)
+(defun cs16:family (raw / version)
+  (setq version (atof raw))
+  (cond ((equal version 23.1 0.0001) "2020")
+        ((and (>= version 24.0) (<= version 24.3)) "2021-2024")
+        ((and (>= version 25.0) (<= version 25.1)) "2025-2026")
+        ((equal version 26.0 0.0001) "2027")
+        (T nil)))
+(defun cs16:write-file (path entry / doc node stream result chunk object stage)
+  (if (not (equal (vl-file-size path) (cadr entry)))
+    (progn
+      (setq result
+        (vl-catch-all-apply
+          '(lambda ()
+            (setq stage "create XML decoder")
+            (setq doc (vlax-create-object "MSXML2.DOMDocument.6.0")
+                  node (vlax-invoke-method doc 'createElement "binary")
+                  stream (vlax-create-object "ADODB.Stream"))
+            (setq stage "decoder type")
+            (vlax-put-property node 'dataType "bin.base64")
+            (vlax-put-property stream 'Type 1)
+            (setq stage "open stream")
+            (vlax-invoke stream 'Open)
+            (setq stage "decode data")
+            (foreach chunk (caddr entry)
+              (vlax-put-property node 'text chunk)
+              (vlax-invoke-method stream 'Write (vlax-get-property node 'nodeTypedValue)))
+            (setq stage "save module")
+            (vlax-invoke-method stream 'SaveToFile path 2)
+            (vlax-invoke-method stream 'Close))
+          nil))
+      (foreach object (list stream node doc)
+        (if object (vl-catch-all-apply 'vlax-release-object (list object))))
+      (if (vl-catch-all-error-p result)
+        (progn (princ (strcat "\nCS16: cannot prepare module (" stage "): " (vl-catch-all-error-message result))) nil)
+        (equal (vl-file-size path) (cadr entry))))
+    T))
+(defun cs16:prepare (family / root folder files ok entry)
+  (setq root (getenv "LOCALAPPDATA"))
+  (if (not root) (setq root (getenv "TEMP")))
+  (if root
+    (progn
+      (setq folder (strcat root "/CS16")) (vl-mkdir folder)
+      (setq folder (strcat folder "/portable")) (vl-mkdir folder)
+      (setq folder (strcat folder "/@@BUILD_ID@@")) (vl-mkdir folder)
+      (setq folder (strcat folder "/" family)) (vl-mkdir folder)
+      (setq files (cs16:payload family) ok T)
+      (foreach entry files
+        (if ok (setq ok (cs16:write-file (strcat folder "/" (car entry)) entry))))
+      (if ok (strcat folder "/CadDustCompat24.dll") nil))
+    nil))
+(defun cs16:start (/ family module)
+  (setq family (cs16:family (getvar "ACADVER")))
+  (cond
+    ((not family) (princ "\nCS16: full AutoCAD 2020-2027 for Windows x64 is required. This version is not supported.\n"))
+    ((wcmatch (strcase (getvar "PROGRAM")) "*LT*") (princ "\nCS16: AutoCAD LT is not supported.\n"))
+    ((not (equal (strcase (getenv "PROCESSOR_ARCHITECTURE")) "AMD64")) (princ "\nCS16: Windows x64 is required.\n"))
+    (T
+      (if (not (getcname "CS16COMPAT24"))
+        (progn
+          (princ "\nCS16: preparing the module for this AutoCAD...\n")
+          (setq module (cs16:prepare family))
+          (if module (command "_.NETLOAD" module))))
+      (if (getcname "CS16COMPAT24")
+        (command "CS16COMPAT24")
+        (princ "\nCS16: module was not loaded. See AutoCAD command history.\n"))))
+  (princ))
+
+@@PAYLOADS@@
+
+(defun c:CS16 () (cs16:start))
+(princ "\nCS16 loaded. Type CS16 to start the game.\n")
+(princ)

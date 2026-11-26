@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net47;net48;net8.0-windows;net10.0-windows</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <UseWindowsForms>true</UseWindowsForms><UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>CadDustCompat24</AssemblyName>
+    <Version>24.0.0</Version>
+    <OutputPath>bin/compat24/</OutputPath>
+    <IntermediateOutputPath>obj/compat24/</IntermediateOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net47'"><AcadSdkVersion>23.1.0</AcadSdkVersion><DefineConstants>$(DefineConstants);ACAD2020</DefineConstants></PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net48'"><AcadSdkVersion>24.0.0</AcadSdkVersion><DefineConstants>$(DefineConstants);ACAD2021</DefineConstants></PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows'"><AcadSdkVersion>25.0.1</AcadSdkVersion><DefineConstants>$(DefineConstants);ACAD2025</DefineConstants></PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'"><AcadSdkVersion>26.0.0</AcadSdkVersion><DefineConstants>$(DefineConstants);ACAD2027</DefineConstants></PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != ''">
+    <PackageReference Include="AutoCAD.NET" Version="$(AcadSdkVersion)" PrivateAssets="all" ExcludeAssets="runtime"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47' Or '$(TargetFramework)' == 'net48'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all"/>
+    <PackageReference Include="System.Text.Json" Version="10.0.14"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Compat.cs"/><Compile Include="HostCompatibility.cs"/><Compile Include="PhysicalInput.cs"/>
+    <Compile Include="Scene.cs"/><Compile Include="CadAsyncCommands.cs"/><Compile Include="Player.cs"/><Compile Include="InputCapture.cs"/>
+    <Compile Include="LatestWorker.cs"/><Compile Include="VectorBatch.cs"/><Compile Include="CameraSmoother.cs"/>
+    <Compile Include="FrameDiagnostics.cs"/>
+    <Compile Include="Combat.cs"/><Compile Include="GameDrawing.cs"/><Compile Include="WeaponHandling.cs"/>
+    <Compile Include="Skybox.cs"/><Compile Include="Navigation.cs"/><Compile Include="WeaponRules.cs"/><Compile Include="ViewModels.cs"/><Compile Include="KeyActions.cs"/>
+    <Compile Include="DraftGeometry.cs"/><Compile Include="ActorSlides.cs"/>
+    <Compile Include="RoundPlay.cs"/><Compile Include="DroppedWeapons.cs"/>
+    <Compile Include="PlayerDeathScene.cs"/>
+    <Compile Include="PlanDrawing.cs"/><Compile Include="WallLettering.cs"/>
+    <EmbeddedResource Include="scene.json"/>
+    <EmbeddedResource Include="weapon-slides.json.gz"/>
+    <EmbeddedResource Include="actor-slides.json.gz"/>
+    <EmbeddedResource Include="world-weapons.json.gz"/>
+    <EmbeddedResource Include="plan-vectors.json"/><EmbeddedResource Include="wall-lettering.json"/>
+  </ItemGroup>
+  <Target Name="DoNotShipHostAssemblies" AfterTargets="ResolveReferences">
+    <ItemGroup><ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(ReferenceCopyLocalPaths.NuGetPackageId)').StartsWith('AutoCAD.NET'))"/></ItemGroup>
+  </Target>
+</Project>

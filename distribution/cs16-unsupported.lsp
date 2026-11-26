@@ -1,0 +1,7 @@
+(defun c:CS16 ()
+  (princ (strcat "\nCS16: this build supports full AutoCAD 2020-2027 for Windows x64. Current ACADVER: " (getvar "ACADVER") ".\n"))
+  (if (< (atof (getvar "ACADVER")) 23.1)
+    (princ "AutoCAD 2019 and earlier are not supported. Minimum: AutoCAD 2020.\n")
+    (princ "This newer AutoCAD needs an updated CS16 package. No game module was loaded.\n"))
+  (princ))
+(princ)
