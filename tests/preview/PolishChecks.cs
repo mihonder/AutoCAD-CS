@@ -61,7 +61,7 @@ static class PolishChecks
         empty.Buy(Combat.Catalog.First(w=>w.Id=="g3sg1"));money=empty.Money;
         Check(!empty.Buy(Combat.Catalog.First(w=>w.Id=="awp"))&&empty.Money==money,"Insufficient funds accepted");
         var score=game.Snapshot() with{Score=true};Check(score.Scores.Length==10,"Scoreboard roster incomplete");
-        File.WriteAllText("../frame-score.json",JsonSerializer.Serialize(scene.Render(0,player.Camera,score)));
+        File.WriteAllText("../../frame-score.json",JsonSerializer.Serialize(scene.Render(0,player.Camera,score)));
         Check(ViewModels.Weapons.Count==Combat.Catalog.Length,"Missing MDL viewmodel slides");
         var smg=new Combat(scene);smg.Step(.01,player,new(Actions:new[]{0x42,0x33,0x34}));
         Check(smg.Weapon.Id=="p90"&&!smg.MenuOpen&&smg.Money==13650,"B3-4 must buy the T-menu P90");

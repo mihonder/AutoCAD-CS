@@ -10,7 +10,7 @@ static class Gameplay24Checks
     {for(double t=0;t<seconds-.000001;t+=.01)h.Step(w,Math.Min(.01,seconds-t));}
     public static void Run()
     {
-        var scene=new Scene(File.ReadAllText("../scene.json"),true);
+        var scene=new Scene(File.ReadAllText("../../assets/scene.json"),true);
         var crashed=new V(-417.3,2134.8,-98);
         bool originalFails=false;try{scene.GroundNear(crashed);}catch(InvalidOperationException){originalFails=true;}
         Check(originalFails,"Original death/drop crash no longer reproduced by fixture");
@@ -63,8 +63,8 @@ static class Gameplay24Checks
         Check(gun.RenderCamera(shooter).Pitch>shooter.Pitch&&gun.LastShotDirection!=new V(Math.Sin(shooter.Yaw),Math.Cos(shooter.Yaw),0),"Render camera / bullet ray not connected to handling");
         gun.SelectSlot(2);Check(gun.RenderCamera(shooter).Pitch==shooter.Pitch,"Switching kept prior gun recoil");
         gun.RestartRound(shooter,true);Check(gun.RenderCamera(shooter).Pitch==shooter.Pitch,"Round retained recoil");
-        Directory.CreateDirectory("../releases/compat24");
-        File.WriteAllText("../releases/compat24/ak-spray.json",JsonSerializer.Serialize(pattern,new JsonSerializerOptions{WriteIndented=true}));
+        Directory.CreateDirectory("../../releases/compat24");
+        File.WriteAllText("../../releases/compat24/ak-spray.json",JsonSerializer.Serialize(pattern,new JsonSerializerOptions{WriteIndented=true}));
         Console.WriteLine("GAMEPLAY24 CHECKS PASSED: original crash reproduced and fixed; crouched death/manual drops; five-minute round; 22 gun profiles; stance/zoom/heat/recovery; actual rays and camera recoil; knife unaffected.");
     }
 }

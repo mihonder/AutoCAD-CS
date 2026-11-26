@@ -9,7 +9,7 @@ static class DraftChecks
     static bool Mono(int c)=>((c>>16)&255)==((c>>8)&255)&&((c>>8)&255)==(c&255);
     public static void Run()
     {
-        var sw=Stopwatch.StartNew();var scene=new Scene(File.ReadAllText("../scene.json"),draft:true);
+        var sw=Stopwatch.StartNew();var scene=new Scene(File.ReadAllText("../../assets/scene.json"),draft:true);
         Console.WriteLine($"Draft: {scene.FaceCount} faces, {scene.DrawingMarkCount} cached vector marks, load {sw.ElapsedMilliseconds} ms");
         Check(scene.FaceCount==4002,"Draft changed map geometry");Check(ActorSlides.FrameCount==192,"Actor frames incomplete");
         RoundChecks.CheckUnchangedWeaponPoses();
@@ -23,10 +23,10 @@ static class DraftChecks
             Check(frame.VisibleFaces>0&&frame.Polygons.Count<80000,$"Bad draft frame {name}/{i}");
             Check(frame.Polygons.Where(p=>p.FaceId>=0).All(p=>Mono(p.Color)),"Map retained coloured materials");
             Check(frame.Labels.All(l=>l.Color==DraftGeometry.White)&&frame.Strokes.All(s=>s.Color==DraftGeometry.White),"HUD is not white CAD text");
-            if(i==0)File.WriteAllText($"../frame-draft-{name}.json",JsonSerializer.Serialize(frame));
+            if(i==0)File.WriteAllText($"../../frame-draft-{name}.json",JsonSerializer.Serialize(frame));
         }
         foreach(var (name,snapshot) in new[]{("menu",game with{Menu=4}),("score",game with{Score=true})})
-            File.WriteAllText($"../frame-draft-{name}.json",JsonSerializer.Serialize(scene.Render(0,player.Camera,snapshot)));
+            File.WriteAllText($"../../frame-draft-{name}.json",JsonSerializer.Serialize(scene.Render(0,player.Camera,snapshot)));
         // A wall must hide all parts of the new actor sprites, including their white paths.
         var end=player.Eye+new V(4096,0,0);double hit=scene.Trace(player.Eye,end);var behind=player.Eye+new V(hit*4096+80,0,0);
         var blocked=scene.Render(0,new(player.Eye,Math.PI/2,0),game with{Actors=new[]{new ActorView(77,behind,true,0,0,false)}});
@@ -49,7 +49,7 @@ static class DraftChecks
             var ct=new ActorView(1,near+right*26,true,i*.25,0,false){Speed=220,Heading=player.Yaw+Math.PI};
             var t=new ActorView(2,near-right*26,false,i*.25,0,false){Speed=130,Heading=player.Yaw+Math.PI};
             var frame=scene.Render(i*.1,player.Camera,game with{Actors=new[]{ct,t}});VectorBatch.Build(frame);
-            File.WriteAllText($"../frame-draft-bots-{i}.json",JsonSerializer.Serialize(frame));
+            File.WriteAllText($"../../frame-draft-bots-{i}.json",JsonSerializer.Serialize(frame));
         }
         // Exercise every baked pose/direction through BSP clipping and triangulation.
         foreach(bool enemy in new[]{false,true})
@@ -63,7 +63,7 @@ static class DraftChecks
             var frame=scene.Render(0,player.Camera,game with{Actors=new[]{actor}});VectorBatch.Build(frame);
             Check(frame.Polygons.Any(p=>p.FaceId==-101),$"Empty actor pose {enemy}/{pose}/{direction}");
             Check(frame.Polygons.Where(p=>p.FaceId==-101).All(p=>Mono(p.Color)),"Actor retained colour");
-            if(enemy&&direction==0&&pose>=9)File.WriteAllText($"../frame-draft-fall-{pose-9}.json",JsonSerializer.Serialize(frame));
+            if(enemy&&direction==0&&pose>=9)File.WriteAllText($"../../frame-draft-fall-{pose-9}.json",JsonSerializer.Serialize(frame));
         }
         var normal=new V(0,0,1);double[] u={1,0,0,0},v={0,1,0,0};
         var marks=DraftGeometry.Build(new[]{new DraftFace(1,new[]{new V(0,0,0),new V(10,0,0),new V(10,10,0),new V(0,10,0)},normal,"test",u,v),new DraftFace(2,new[]{new V(10,0,0),new V(20,0,0),new V(20,10,0),new V(10,10,0)},normal,"test",u,v)});

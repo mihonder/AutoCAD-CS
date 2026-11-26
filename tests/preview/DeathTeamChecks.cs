@@ -24,7 +24,7 @@ static class DeathTeamChecks
             int round=game.RoundNumber;
             actions.Press(0x4d,false);game.Step(.02,player,new(Actions:actions.Drain()));
             Check(game.Menu==7,"M did not open team menu");
-            if(team==Team.CT)File.WriteAllText("../frame-round-team-menu.json",JsonSerializer.Serialize(scene.Render(game.Time,player.Camera,game.Snapshot())));
+            if(team==Team.CT)File.WriteAllText("../../frame-round-team-menu.json",JsonSerializer.Serialize(scene.Render(game.Time,player.Camera,game.Snapshot())));
             actions.Press(team==Team.CT?0x32:0x31,false);game.Step(.02,player,new(Actions:actions.Drain()));
             Check(game.PlayerTeam==team&&game.RoundNumber==round+1&&!game.MenuOpen,"Team selection did not restart on selected side");
             Balance(game);Quiet(game);
@@ -55,7 +55,7 @@ static class DeathTeamChecks
                 Check((player.Eye-position).Length<.001&&game.DeathScene.Active,"Input moved player/skipped death scene");
                 var frame=scene.Render(game.Time,game.RenderCamera(player),game.Snapshot());VectorBatch.Build(frame);
                 Check(frame.Polygons.Any(p=>p.FaceId==-100),"Player body absent from death camera");
-                File.WriteAllText($"../frame-death-{team}-{at*100:000}.json",JsonSerializer.Serialize(frame));
+                File.WriteAllText($"../../frame-death-{team}-{at*100:000}.json",JsonSerializer.Serialize(frame));
             }
             game.Step(.02,player,new(Jump:true));game.Step(.02,player,new());
             Check(game.Observer.Mode==SpectatorMode.Chase,"Death-scene tap prematurely changed spectator mode");

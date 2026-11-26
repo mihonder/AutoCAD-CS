@@ -34,11 +34,11 @@
     <Compile Include="RoundPlay.cs"/><Compile Include="DroppedWeapons.cs"/>
     <Compile Include="PlayerDeathScene.cs"/>
     <Compile Include="PlanDrawing.cs"/><Compile Include="WallLettering.cs"/>
-    <EmbeddedResource Include="scene.json"/>
-    <EmbeddedResource Include="weapon-slides.json.gz"/>
-    <EmbeddedResource Include="actor-slides.json.gz"/>
-    <EmbeddedResource Include="world-weapons.json.gz"/>
-    <EmbeddedResource Include="plan-vectors.json"/><EmbeddedResource Include="wall-lettering.json"/>
+    <EmbeddedResource Include="../assets/scene.json" LogicalName="CadDustLab.scene.json"/>
+    <EmbeddedResource Include="../assets/weapon-slides.json.gz" LogicalName="CadDustLab.weapon-slides.json.gz"/>
+    <EmbeddedResource Include="../assets/actor-slides.json.gz" LogicalName="CadDustLab.actor-slides.json.gz"/>
+    <EmbeddedResource Include="../assets/world-weapons.json.gz" LogicalName="CadDustLab.world-weapons.json.gz"/>
+    <EmbeddedResource Include="../assets/plan-vectors.json" LogicalName="CadDustLab.plan-vectors.json"/><EmbeddedResource Include="../assets/wall-lettering.json" LogicalName="CadDustLab.wall-lettering.json"/>
   </ItemGroup>
   <Target Name="DoNotShipHostAssemblies" AfterTargets="ResolveReferences">
     <ItemGroup><ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::Copy('%(ReferenceCopyLocalPaths.NuGetPackageId)').StartsWith('AutoCAD.NET'))"/></ItemGroup>

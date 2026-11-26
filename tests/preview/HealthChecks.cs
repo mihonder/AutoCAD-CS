@@ -9,7 +9,7 @@ static class HealthChecks
     {var d=(to-from).Unit;return new(from,Math.Atan2(d.X,d.Y),Math.Asin(d.Z));}
     public static void Run()
     {
-        var scene=new Scene(File.ReadAllText("../scene.json"),true);
+        var scene=new Scene(File.ReadAllText("../../assets/scene.json"),true);
         var freshPlayer=new Player(scene);var round=new Combat(scene,true);round.RestartRound(freshPlayer);
         Check(round.Bots.All(b=>b.Health==100),"Bot did not spawn with 100 HP");
         foreach(var b in round.Bots)b.Health=1;

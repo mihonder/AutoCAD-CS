@@ -21,10 +21,10 @@ static class FreezeChecks
         game.Step(.1,player,new(Fire:true));Check(!game.CanFight&&!game.CanMove&&game.Shots==shots&&player.Eye==freezeEye,"Freeze allows fighting / movement");
         for(int i=0;i<150;i++)game.Step(.02,player,new());
         Check(game.CanFight&&game.FreezeRemaining==0,"Freeze never expires");
-        File.WriteAllText("../frame-freeze-bright.json",System.Text.Json.JsonSerializer.Serialize(b));
-        File.WriteAllText("../frame-freeze-dim.json",System.Text.Json.JsonSerializer.Serialize(a));
-        File.WriteAllText("../frame-freeze-buy.json",System.Text.Json.JsonSerializer.Serialize(Draw(2.9,4)));
-        File.WriteAllText("../frame-paused.json",System.Text.Json.JsonSerializer.Serialize(paused));
+        File.WriteAllText("../../frame-freeze-bright.json",System.Text.Json.JsonSerializer.Serialize(b));
+        File.WriteAllText("../../frame-freeze-dim.json",System.Text.Json.JsonSerializer.Serialize(a));
+        File.WriteAllText("../../frame-freeze-buy.json",System.Text.Json.JsonSerializer.Serialize(Draw(2.9,4)));
+        File.WriteAllText("../../frame-paused.json",System.Text.Json.JsonSerializer.Serialize(paused));
         Console.WriteLine("FREEZE CHECKS PASSED: 3-2-1 pulses, menu/Tab visibility, separate pause prompt, no fire/movement, live round after 3 s.");
     }
 }

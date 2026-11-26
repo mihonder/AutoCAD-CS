@@ -3,7 +3,7 @@ import base64
 import hashlib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 BUNDLE = ROOT / "dist" / "compat24" / "CS16.bundle"
 FAMILIES = ("2020", "2021-2024", "2025-2026", "2027")
 

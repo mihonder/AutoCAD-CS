@@ -5,7 +5,7 @@ static class OcclusionChecks
 {
     public static void Run(Scene scene)
     {
-        using var json=JsonDocument.Parse(File.ReadAllText("../scene.json"));var r=json.RootElement;
+        using var json=JsonDocument.Parse(File.ReadAllText("../../assets/scene.json"));var r=json.RootElement;
         int worldEnd=r.GetProperty("worldFirstFace").GetInt32()+r.GetProperty("worldFaceCount").GetInt32();
         var faces=r.GetProperty("faces").EnumerateArray().Select(f=>(Id:f.GetProperty("id").GetInt32(),Points:f.GetProperty("points").EnumerateArray().Select(V.Read).ToArray(),Normal:V.Read(f.GetProperty("normal")))).ToArray();
         bool Inside(V[] polygon,V point,V normal)
@@ -25,7 +25,7 @@ static class OcclusionChecks
         {
             var eye=scene.GroundNear(hint);double yaw=angle*Math.PI/4;var forward=new V(Math.Sin(yaw),Math.Cos(yaw),0);var right=new V(Math.Cos(yaw),-Math.Sin(yaw),0);
             var frame=scene.Render(0,new(eye,yaw,0),game);
-            if(hint==scene.TerroristSpawns[0]&&angle%2==0)File.WriteAllText($"../frame-t-crates-{angle}.json",JsonSerializer.Serialize(frame));
+            if(hint==scene.TerroristSpawns[0]&&angle%2==0)File.WriteAllText($"../../frame-t-crates-{angle}.json",JsonSerializer.Serialize(frame));
             for(int x=-650;x<=650;x+=100)for(int y=-160;y<=260;y+=70)
             {
                 var direction=(forward+right*(x/720.0)+new V(0,0,y/720.0)).Unit;double best=double.PositiveInfinity;var closest=new HashSet<int>();

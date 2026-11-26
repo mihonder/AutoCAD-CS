@@ -9,7 +9,7 @@
     <PackageReference Include="System.Text.Json" Version="10.0.14"/>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="../FrameDiagnostics.cs" Link="FrameDiagnostics.cs"/>
-    <Compile Include="../Compat.cs" Link="Compat.cs"/>
+    <Compile Include="../../src/FrameDiagnostics.cs" Link="FrameDiagnostics.cs"/>
+    <Compile Include="../../src/Compat.cs" Link="Compat.cs"/>
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ static class RoundChecks
         // check independent of historical DLLs outside the repository.
         using var baseline=JsonDocument.Parse(File.ReadAllText("fixtures/weapon-poses-draft14.json"));
         using var sha=SHA256.Create();
-        using var file=File.OpenRead("../weapon-slides.json.gz");using var zip=new GZipStream(file,CompressionMode.Decompress);using var current=JsonDocument.Parse(zip);
+        using var file=File.OpenRead("../../assets/weapon-slides.json.gz");using var zip=new GZipStream(file,CompressionMode.Decompress);using var current=JsonDocument.Parse(zip);
         foreach(var weapon in Combat.Catalog)
         {
             foreach(string pose in new[]{"idle","fire"})
@@ -29,11 +29,11 @@ static class RoundChecks
     static void Save(string name,Scene scene,Player player,Combat game)
     {
         var frame=scene.Render(game.Time,game.RenderCamera(player),game.Snapshot());VectorBatch.Build(frame);
-        File.WriteAllText("../frame-round-"+name+".json",JsonSerializer.Serialize(frame));
+        File.WriteAllText("../../frame-round-"+name+".json",JsonSerializer.Serialize(frame));
     }
     public static void Run()
     {
-        var scene=new Scene(File.ReadAllText("../scene.json"),true);var player=new Player(scene);
+        var scene=new Scene(File.ReadAllText("../../assets/scene.json"),true);var player=new Player(scene);
         foreach(var hint in scene.TerroristSpawns.Take(3).Concat(scene.CounterSpawns.Take(2)).Concat(new[]{scene.Position(0)}))
         {
             player.Place(scene,hint);var initial=player.Eye;
@@ -80,7 +80,7 @@ static class RoundChecks
         game.ToggleScope();Check(game.Fov==15,"Scout high zoom");game.ToggleScope();Check(game.Fov==90,"Scope did not cycle off");
         player.Place(scene,scene.Position(0));game.Step(.01,player,new());game.DropCurrent();
         var flat=game.Drops.Last();var pose=new CameraPose(flat.Position+new V(-25,-70,70),Math.Atan2(25,70),-.75);
-        var dropFrame=scene.Render(0,pose,game.Snapshot() with{Actors=Array.Empty<ActorView>()});VectorBatch.Build(dropFrame);Check(dropFrame.Polygons.Any(p=>p.FaceId==-10000-flat.Id),"Drop not rendered");File.WriteAllText("../frame-round-drop.json",JsonSerializer.Serialize(dropFrame));
+        var dropFrame=scene.Render(0,pose,game.Snapshot() with{Actors=Array.Empty<ActorView>()});VectorBatch.Build(dropFrame);Check(dropFrame.Polygons.Any(p=>p.FaceId==-10000-flat.Id),"Drop not rendered");File.WriteAllText("../../frame-round-drop.json",JsonSerializer.Serialize(dropFrame));
         game.HurtPlayer(300,player);Check(game.Dead,"Death did not happen");
         Advance(game,player,12);Check(game.Dead,"Player auto-respawned mid-round");
         Save("chase",scene,player,game);
@@ -103,7 +103,7 @@ static class RoundChecks
         for(int i=0;i<WallLettering.PreviewViews.Length;i++)
         {
             var f=scene.Render(0,WallLettering.PreviewViews[i],game.Snapshot() with{Dead=false,Actors=Array.Empty<ActorView>(),RoundResult="",Notice="",Freeze=0});
-            VectorBatch.Build(f);File.WriteAllText("../frame-lettering-"+i+".json",JsonSerializer.Serialize(f));
+            VectorBatch.Build(f);File.WriteAllText("../../frame-lettering-"+i+".json",JsonSerializer.Serialize(f));
         }
         Console.WriteLine($"POLISH18 CHECKS PASSED: slot selection after pickup, wheel accumulation/wrap, empty grenade slot; plan {plan.ContourCount} contours/{plan.HatchCount} hatches; {scene.LetteringMarkCount} wall text marks.");
         DeathTeamChecks.Run(scene);

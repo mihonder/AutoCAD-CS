@@ -5,8 +5,8 @@ static class CrouchChecks
 {
     public static void Run()
     {
-        var scene=new Scene(File.ReadAllText("../scene.json"));
-        using var source=JsonDocument.Parse(File.ReadAllText("../scene.json"));
+        var scene=new Scene(File.ReadAllText("../../assets/scene.json"));
+        using var source=JsonDocument.Parse(File.ReadAllText("../../assets/scene.json"));
         void Check(bool ok,string message){if(!ok)throw new Exception(message);}
         int ramps=0,blocked=0;double maxLift=0,maxDrift=0;
         foreach(var face in source.RootElement.GetProperty("faces").EnumerateArray())

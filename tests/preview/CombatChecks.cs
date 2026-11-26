@@ -21,12 +21,12 @@ static class CombatChecks
             var snapshot=view with{Weapon=weapon,Reload=reload,Recoil=1,Flash=true,HitMarker=true};
             var frame=scene.Render(0,player.Camera,snapshot);VectorBatch.Build(frame);
             Check(frame.Labels.Any(l=>l.Text.Contains("Деньги"))&&frame.Strokes.All(s=>s.Weight==30),"Native HUD/table data missing");
-            if(reload==0)File.WriteAllText($"../frame-weapon-{weapon.Id}.json",JsonSerializer.Serialize(frame));
+            if(reload==0)File.WriteAllText($"../../frame-weapon-{weapon.Id}.json",JsonSerializer.Serialize(frame));
         }
         for(int category=0;category<=5;category++)
         {
             var frame=scene.Render(0,player.Camera,view with{Menu=category});VectorBatch.Build(frame);
-            File.WriteAllText($"../frame-menu-{category}.json",JsonSerializer.Serialize(frame));
+            File.WriteAllText($"../../frame-menu-{category}.json",JsonSerializer.Serialize(frame));
         }
         game=new Combat(scene);foreach(var b in game.Bots)b.NextShot=1e9;
         var target=game.Bots[0];var origin=player.Eye;
@@ -38,7 +38,7 @@ static class CombatChecks
         Check(game.Snapshot().Effects.Any(e=>e.Blood)&&game.Snapshot().HitMarker,"Hit feedback missing");
         for(int i=0;i<5;i++)game.Step(.06,player,new());
         Check(game.Snapshot().Actors[0].Fall>.4,"Death fall did not advance");
-        File.WriteAllText("../frame-death.json",JsonSerializer.Serialize(scene.Render(.3,aim,game.Snapshot())));
+        File.WriteAllText("../../frame-death.json",JsonSerializer.Serialize(scene.Render(.3,aim,game.Snapshot())));
         game.Handle(0x52);int before=game.Ammo;Check(!game.Fire(aim),"Shot allowed while reloading");
         for(int i=0;i<50;i++)game.Step(.06,player,new());
         Check(game.Ammo>before&&game.Ammo==game.Weapon.Magazine&&game.Reserve==39,"Finite reserve reload failed");
@@ -62,7 +62,7 @@ static class CombatChecks
             {
                 var sw=Stopwatch.StartNew();var frame=scene.Render(i,new(eye,yaw+i*Math.PI/6,0),view);VectorBatch.Build(frame);sw.Stop();costs.Add(sw.Elapsed.TotalMilliseconds);
                 Check(frame.VisibleFaces>0,$"Missing map geometry at {name}/{i}");
-                if(i==0)File.WriteAllText($"../frame-map-{name}.json",JsonSerializer.Serialize(frame));
+                if(i==0)File.WriteAllText($"../../frame-map-{name}.json",JsonSerializer.Serialize(frame));
             }
         }
         costs.Sort();Console.WriteLine($"COMBAT CHECKS PASSED: B44, {Combat.Catalog.Length} weapons / reload poses, 6 menus, fire rate, hit, kill, blood, fall, reload, wall occlusion, friendly fire; 72 full-map views p95 {costs[(int)(costs.Count*.95)]:F2} ms.");

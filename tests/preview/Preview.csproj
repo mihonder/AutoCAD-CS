@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFrameworks>net47;net8.0;net10.0</TargetFrameworks><LangVersion>latest</LangVersion><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects></PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all"/>
+    <PackageReference Include="System.Text.Json" Version="10.0.14"/>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../src/Compat.cs" Link="Compat.cs"/>
+    <Compile Include="../../src/PhysicalInput.cs" Link="PhysicalInput.cs"/>
+    <Compile Include="../../src/WeaponHandling.cs" Link="WeaponHandling.cs"/>
+    <Compile Include="../../src/Scene.cs" Link="Scene.cs"/><Compile Include="../../src/Player.cs" Link="Player.cs"/>
+    <Compile Include="../../src/LatestWorker.cs" Link="LatestWorker.cs"/><Compile Include="../../src/VectorBatch.cs" Link="VectorBatch.cs"/>
+    <Compile Include="../../src/CameraSmoother.cs" Link="CameraSmoother.cs"/><Compile Include="../../src/Combat.cs" Link="Combat.cs"/>
+    <Compile Include="../../src/GameDrawing.cs" Link="GameDrawing.cs"/><Compile Include="../../src/Skybox.cs" Link="Skybox.cs"/>
+    <Compile Include="../../src/Navigation.cs" Link="Navigation.cs"/><Compile Include="../../src/WeaponRules.cs" Link="WeaponRules.cs"/>
+    <Compile Include="../../src/ViewModels.cs" Link="ViewModels.cs"/><Compile Include="../../src/KeyActions.cs" Link="KeyActions.cs"/>
+    <Compile Include="../../src/DraftGeometry.cs" Link="DraftGeometry.cs"/><Compile Include="../../src/ActorSlides.cs" Link="ActorSlides.cs"/>
+    <Compile Include="../../src/RoundPlay.cs" Link="RoundPlay.cs"/><Compile Include="../../src/DroppedWeapons.cs" Link="DroppedWeapons.cs"/>
+    <Compile Include="../../src/PlayerDeathScene.cs" Link="PlayerDeathScene.cs"/>
+    <Compile Include="../../src/PlanDrawing.cs" Link="PlanDrawing.cs"/><Compile Include="../../src/WallLettering.cs" Link="WallLettering.cs"/>
+    <EmbeddedResource Include="../../assets/weapon-slides.json.gz" Link="weapon-slides.json.gz"/>
+    <EmbeddedResource Include="../../assets/actor-slides.json.gz" Link="actor-slides.json.gz"/>
+    <EmbeddedResource Include="../../assets/world-weapons.json.gz" Link="world-weapons.json.gz"/>
+    <EmbeddedResource Include="../../assets/plan-vectors.json" Link="plan-vectors.json"/><EmbeddedResource Include="../../assets/wall-lettering.json" Link="wall-lettering.json"/>
+  </ItemGroup>
+</Project>

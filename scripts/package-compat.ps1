@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$project = [IO.Path]::GetFullPath($PSScriptRoot)
+$project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $bundle = Join-Path $project 'dist\compat24\CS16.bundle'
 $null = New-Item -ItemType Directory -Path $bundle -Force
 $expected = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
@@ -12,7 +12,7 @@ function Copy-Artifact([string]$Source, [string]$Relative) {
 }
 $families = [ordered]@{'2020'='net47';'2021-2024'='net48';'2025-2026'='net8.0-windows';'2027'='net10.0-windows'}
 foreach ($family in $families.Keys) {
-    $output = Join-Path $project ('bin\compat24\'+$families[$family])
+    $output = Join-Path $project ('src\bin\compat24\'+$families[$family])
     if (-not (Test-Path -LiteralPath (Join-Path $output 'CadDustCompat24.dll'))) { throw "Missing build: $family" }
     foreach ($file in Get-ChildItem -LiteralPath $output -File | Where-Object { $_.Extension -eq '.dll' -or $_.Name -eq 'CadDustCompat24.deps.json' }) {
         if ($file.Name -match '^(AcMgd|AcDbMgd|AcCoreMgd|AdWindows|accore|acad)\.dll$') { throw "Host SDK DLL in output: $($file.Name)" }
@@ -24,7 +24,7 @@ Copy-Artifact (Join-Path $project 'distribution\cs16-unsupported.lsp') 'Contents
 Copy-Artifact (Join-Path $project 'distribution\cs16-loader.lsp') 'Contents\cs16-loader.lsp'
 Copy-Artifact (Join-Path $project 'distribution\README.txt') 'README.txt'
 Copy-Artifact (Join-Path $project 'distribution\THIRD-PARTY.txt') 'THIRD-PARTY.txt'
-Copy-Artifact (Join-Path $project 'packages.lock.json') 'BUILD-DEPENDENCIES.json'
+Copy-Artifact (Join-Path $project 'src\packages.lock.json') 'BUILD-DEPENDENCIES.json'
 foreach ($file in Get-ChildItem -LiteralPath $bundle -Recurse -File) {
     $resolved = [IO.Path]::GetFullPath($file.FullName)
     if (-not $resolved.StartsWith($bundle+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)) { throw 'Output escaped bundle' }
@@ -48,7 +48,7 @@ $hashes = foreach ($file in Get-ChildItem -LiteralPath $bundle -Recurse -File | 
 }
 [IO.File]::WriteAllLines((Join-Path $bundle 'SHA256SUMS.txt'),$hashes,(New-Object Text.UTF8Encoding($false)))
 $zip = Join-Path $project 'dist\CS16-by-mihonder-compat24-AutoCAD2020-2027.zip'
-& python (Join-Path $project 'make_portable.py')
+& python (Join-Path $project 'scripts\make_portable.py')
 if ($LASTEXITCODE) { throw 'Portable launcher generation failed' }
 $portable = Join-Path (Split-Path -Parent $bundle) 'CS16.lsp'
 $readme = Join-Path (Split-Path -Parent $bundle) 'README.txt'
