@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$bundle = Join-Path $project 'dist\compat24\CS16.bundle'
+$bundle = Join-Path $project 'dist\v1.0.1\CS16.bundle'
 $null = New-Item -ItemType Directory -Path $bundle -Force
 $expected = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
 function Copy-Artifact([string]$Source, [string]$Relative) {
@@ -12,9 +12,9 @@ function Copy-Artifact([string]$Source, [string]$Relative) {
 }
 $families = [ordered]@{'2020'='net47';'2021-2024'='net48';'2025-2026'='net8.0-windows';'2027'='net10.0-windows'}
 foreach ($family in $families.Keys) {
-    $output = Join-Path $project ('src\bin\compat24\'+$families[$family])
-    if (-not (Test-Path -LiteralPath (Join-Path $output 'CadDustCompat24.dll'))) { throw "Missing build: $family" }
-    foreach ($file in Get-ChildItem -LiteralPath $output -File | Where-Object { $_.Extension -eq '.dll' -or $_.Name -eq 'CadDustCompat24.deps.json' }) {
+    $output = Join-Path $project ('src\bin\v1.0.1\'+$families[$family])
+    if (-not (Test-Path -LiteralPath (Join-Path $output 'AutoCADCS.dll'))) { throw "Missing build: $family" }
+    foreach ($file in Get-ChildItem -LiteralPath $output -File | Where-Object { $_.Extension -eq '.dll' -or $_.Name -eq 'AutoCADCS.deps.json' }) {
         if ($file.Name -match '^(AcMgd|AcDbMgd|AcCoreMgd|AdWindows|accore|acad)\.dll$') { throw "Host SDK DLL in output: $($file.Name)" }
         Copy-Artifact $file.FullName ('Contents\'+$family+'\'+$file.Name)
     }
@@ -47,7 +47,7 @@ $hashes = foreach ($file in Get-ChildItem -LiteralPath $bundle -Recurse -File | 
     (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash+'  '+$file.FullName.Substring($bundle.Length+1).Replace('\','/')
 }
 [IO.File]::WriteAllLines((Join-Path $bundle 'SHA256SUMS.txt'),$hashes,(New-Object Text.UTF8Encoding($false)))
-$zip = Join-Path $project 'dist\CS16-by-mihonder-compat24-AutoCAD2020-2027.zip'
+$zip = Join-Path $project 'dist\CS16-v1.0.1-AutoCAD2020-2027.zip'
 & python (Join-Path $project 'scripts\make_portable.py')
 if ($LASTEXITCODE) { throw 'Portable launcher generation failed' }
 $portable = Join-Path (Split-Path -Parent $bundle) 'CS16.lsp'

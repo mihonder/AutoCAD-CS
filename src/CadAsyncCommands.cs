@@ -14,16 +14,16 @@ namespace CadDustLab;
 public class Commands
 {
     private static Walk? walk;
-    private const string CommandGroup="CSDUST24";
-    [CommandMethod(CommandGroup,"DUSTROUNDSTOP24",CommandFlags.Modal)] public void DraftStop()=>Stop();
-    private static IEnumerable<Type> LegacyTypes=>AppDomain.CurrentDomain.GetAssemblies().Where(a=>a.GetName().Name is "CadDustCompat23" or "CadDustCompat22" or "CadDustCompat21" or "CadDustCompat20" or "CadDustRound19" or "CadDustRound18" or "CadDustRound17" or "CadDustRound16" or "CadDustRound15" or "CadDustDraft14" or "CadDustPolish13").Select(a=>a.GetType("CadDustLab.Commands")!);
+    private const string CommandGroup="CS16_V101";
+    [CommandMethod(CommandGroup,"CS16STOP101",CommandFlags.Modal)] public void DraftStop()=>Stop();
+    private static IEnumerable<Type> LegacyTypes=>AppDomain.CurrentDomain.GetAssemblies().Where(a=>a.GetName().Name is "CadDustCompat24" or "CadDustCompat23" or "CadDustCompat22" or "CadDustCompat21" or "CadDustCompat20" or "CadDustRound19" or "CadDustRound18" or "CadDustRound17" or "CadDustRound16" or "CadDustRound15" or "CadDustDraft14" or "CadDustPolish13").Select(a=>a.GetType("CadDustLab.Commands")!);
     private static Type? LegacyType=>LegacyTypes.FirstOrDefault(t=>t.GetField("walk",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static)?.GetValue(null) is not null);
     private static bool LegacyActive=>LegacyType?.GetField("walk",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static)?.GetValue(null) is not null;
     private static void Legacy(string method){foreach(var t in method=="Stop"?LegacyTypes:LegacyTypes.Where(t=>t==LegacyType))t.GetMethod(method)!.Invoke(Activator.CreateInstance(t),null);}
     [CommandMethod(CommandGroup,"DUSTWALK",CommandFlags.Modal)] public void Start(){if(walk is null&&LegacyActive)Legacy("Start");else Launch(false,true);}
     [CommandMethod(CommandGroup,"DUSTPLAY",CommandFlags.Modal)] public void Play(){if(walk is null&&LegacyActive)Legacy("Play");else Launch(true,true);}
     [CommandMethod(CommandGroup,"CS16",CommandFlags.Modal)] public void CombatVersion()=>Launch(true,true);
-    [CommandMethod(CommandGroup,"CS16COMPAT24",CommandFlags.Modal)] public void CompatibleVersion()=>Launch(true,true);
+    [CommandMethod(CommandGroup,"CS16V101",CommandFlags.Modal)] public void CompatibleVersion()=>Launch(true,true);
     [CommandMethod(CommandGroup,"CS16ROLLBACK19",CommandFlags.Modal)] public void Rollback19()
     {
         var old=LegacyTypes.FirstOrDefault(t=>t.Assembly.GetName().Name=="CadDustRound19");
@@ -51,7 +51,7 @@ public class Commands
         catch(System.Exception ex)
         {
             try{File.WriteAllText(Path.Combine(HostCompatibility.LogDirectory,"startup.error.txt"),ex.ToString());}catch(IOException){}catch(UnauthorizedAccessException){}
-            Acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nCS16 start failed: "+ex.Message+". Details: %LOCALAPPDATA%/CS16/logs/compat24.\n");
+            Acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nCS16 start failed: "+ex.Message+". Details: %LOCALAPPDATA%/CS16/logs/v1.0.1.\n");
         }
     }
     [CommandMethod(CommandGroup,"DUSTSTOP",CommandFlags.Modal)] public void Stop(){walk?.Dispose();walk=null;Legacy("Stop");}

@@ -49,7 +49,7 @@
       (setq files (cs16:payload family) ok T)
       (foreach entry files
         (if ok (setq ok (cs16:write-file (strcat folder "/" (car entry)) entry))))
-      (if ok (strcat folder "/CadDustCompat24.dll") nil))
+      (if ok (strcat folder "/AutoCADCS.dll") nil))
     nil))
 (defun cs16:start (/ family module)
   (setq family (cs16:family (getvar "ACADVER")))
@@ -58,18 +58,18 @@
     ((wcmatch (strcase (getvar "PROGRAM")) "*LT*") (princ "\nCS16: AutoCAD LT is not supported.\n"))
     ((not (equal (strcase (getenv "PROCESSOR_ARCHITECTURE")) "AMD64")) (princ "\nCS16: Windows x64 is required.\n"))
     (T
-      (if (not (getcname "CS16COMPAT24"))
+      (if (not (getcname "CS16V101"))
         (progn
           (princ "\nCS16: preparing the module for this AutoCAD...\n")
           (setq module (cs16:prepare family))
           (if module (command "_.NETLOAD" module))))
-      (if (getcname "CS16COMPAT24")
-        (command "CS16COMPAT24")
+      (if (getcname "CS16V101")
+        (command "CS16V101")
         (princ "\nCS16: module was not loaded. See AutoCAD command history.\n"))))
   (princ))
 
 @@PAYLOADS@@
 
 (defun c:CS16 () (cs16:start))
-(princ "\nCS16 loaded. Type CS16 to start the game.\n")
+(princ "\nCS 1.6 v1.0.1 loaded. Type CS16 to start the game.\n")
 (princ)

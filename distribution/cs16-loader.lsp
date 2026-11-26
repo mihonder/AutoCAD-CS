@@ -11,12 +11,12 @@
   (setq family (cs16:family (getvar "ACADVER")))
   (cond
     ((not family) (princ "\nCS16: supported AutoCAD versions are 2020-2027, Windows x64.\n"))
-    ((not (setq dll (findfile (strcat bundle "/Contents/" family "/CadDustCompat24.dll"))))
+    ((not (setq dll (findfile (strcat bundle "/Contents/" family "/AutoCADCS.dll"))))
       (princ "\nCS16: module missing. Extract the complete CS16.bundle folder.\n"))
     (T
-      (if (not (getcname "CS16COMPAT24")) (command "_.NETLOAD" dll))
-      (if (getcname "CS16COMPAT24")
-        (command "CS16COMPAT24")
+      (if (not (getcname "CS16V101")) (command "_.NETLOAD" dll))
+      (if (getcname "CS16V101")
+        (command "CS16V101")
         (princ "\nCS16: module could not be loaded. See the AutoCAD command history.\n"))))
   (princ))
 (princ)

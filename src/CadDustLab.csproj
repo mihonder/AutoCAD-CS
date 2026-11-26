@@ -5,10 +5,11 @@
     <UseWindowsForms>true</UseWindowsForms><UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <AssemblyName>CadDustCompat24</AssemblyName>
-    <Version>24.0.0</Version>
-    <OutputPath>bin/compat24/</OutputPath>
-    <IntermediateOutputPath>obj/compat24/</IntermediateOutputPath>
+    <AssemblyName>AutoCADCS</AssemblyName>
+    <Version>1.0.1</Version>
+    <Title>CS 1.6 for AutoCAD</Title><Product>CS 1.6</Product>
+    <OutputPath>bin/v1.0.1/</OutputPath>
+    <IntermediateOutputPath>obj/v1.0.1/</IntermediateOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>

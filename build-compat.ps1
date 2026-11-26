@@ -35,12 +35,12 @@ try {
         Push-Location tests/preview
         try {
             foreach ($family in @('2020','2021-2024')) {
-                & './bin/Release/net47/Preview.exe' --module "../../dist/compat24/CS16.bundle/Contents/$family/CadDustCompat24.dll"
+                & './bin/Release/net47/Preview.exe' --module "../../dist/v1.0.1/CS16.bundle/Contents/$family/AutoCADCS.dll"
                 if ($LASTEXITCODE) { throw "Packaged Framework module failed: $family" }
             }
-            & dotnet './bin/Release/net8.0/Preview.dll' --module '../../dist/compat24/CS16.bundle/Contents/2025-2026/CadDustCompat24.dll'
+            & dotnet './bin/Release/net8.0/Preview.dll' --module '../../dist/v1.0.1/CS16.bundle/Contents/2025-2026/AutoCADCS.dll'
             if ($LASTEXITCODE) { throw 'Packaged .NET 8 module failed' }
-            & $DotNet './bin/Release/net10.0/Preview.dll' --module '../../dist/compat24/CS16.bundle/Contents/2027/CadDustCompat24.dll'
+            & $DotNet './bin/Release/net10.0/Preview.dll' --module '../../dist/v1.0.1/CS16.bundle/Contents/2027/AutoCADCS.dll'
             if ($LASTEXITCODE) { throw 'Packaged .NET 10 module failed' }
         } finally { Pop-Location }
     }

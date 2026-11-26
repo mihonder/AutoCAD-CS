@@ -63,8 +63,8 @@ static class Gameplay24Checks
         Check(gun.RenderCamera(shooter).Pitch>shooter.Pitch&&gun.LastShotDirection!=new V(Math.Sin(shooter.Yaw),Math.Cos(shooter.Yaw),0),"Render camera / bullet ray not connected to handling");
         gun.SelectSlot(2);Check(gun.RenderCamera(shooter).Pitch==shooter.Pitch,"Switching kept prior gun recoil");
         gun.RestartRound(shooter,true);Check(gun.RenderCamera(shooter).Pitch==shooter.Pitch,"Round retained recoil");
-        Directory.CreateDirectory("../../releases/compat24");
-        File.WriteAllText("../../releases/compat24/ak-spray.json",JsonSerializer.Serialize(pattern,new JsonSerializerOptions{WriteIndented=true}));
+        Directory.CreateDirectory("../../releases/v1.0.1");
+        File.WriteAllText("../../releases/v1.0.1/ak-spray.json",JsonSerializer.Serialize(pattern,new JsonSerializerOptions{WriteIndented=true}));
         Console.WriteLine("GAMEPLAY24 CHECKS PASSED: original crash reproduced and fixed; crouched death/manual drops; five-minute round; 22 gun profiles; stance/zoom/heat/recovery; actual rays and camera recoil; knife unaffected.");
     }
 }
