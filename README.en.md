@@ -2,7 +2,7 @@
 
 [Русский](README.md) | **[English](README.en.md)**
 
-CS 1.6 in AutoCAD (using its vector graphics engine). Dust 2 map. Version **1.1.0**.
+CS 1.6 in AutoCAD (a simplified CS 1.6 engine + AutoCAD’s vector renderer). Dust 2 map. Version **1.1.0**.
 
 **[Download CS 1.6 v1.1.0 — ready-to-play ZIP for AutoCAD 2020–2027](https://github.com/mihonder/AutoCAD-CS/releases/download/v1.1.0/CS16-v1.1.0-AutoCAD2020-2027.zip)**
 

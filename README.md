@@ -2,7 +2,7 @@
 
 **[Русский](README.md)** | [English](README.en.md)
 
-CS 1.6 в AutoCAD (на его векторном движке). Карта Dust 2. Версия **1.1.0**.
+CS 1.6 в AutoCAD (упрощенный движок CS1.6 + векторный рендер AutoCAD). Карта Dust 2. Версия **1.1.0**.
 
 **[Скачать CS 1.6 v1.1.0 — готовый ZIP для AutoCAD 2020–2027](https://github.com/mihonder/AutoCAD-CS/releases/download/v1.1.0/CS16-v1.1.0-AutoCAD2020-2027.zip)**
 
