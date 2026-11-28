@@ -46,7 +46,7 @@ AutoCAD LT, macOS and Windows x86 are outside the project's current scope.
 | G, E | Drop, pick up a weapon |
 | H / Р | Bot difficulty |
 | M / Ь | Choose T or CT; bots balance the teams |
-| L, then 1 or 2 | Choose Russian (1) or English (2). Each game starts in Russian. |
+| L | Change language |
 | Tab | Scoreboard |
 | F5 | New round |
 | After death: tap Space | Switch spectator mode |
