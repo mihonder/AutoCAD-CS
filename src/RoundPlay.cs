@@ -1,16 +1,16 @@
 namespace CadDustLab;
 
 public sealed record DropView(int Id,string Weapon,V Position,double Heading,int Magazine,int Reserve,double PickupAt);
-public sealed record BotSkill(string Name,double Reaction,double Accuracy,double Pause,int Burst,double Sight,double Turn,double Memory,int Damage);
+public sealed record BotSkill(string Name,string EnglishName,double Reaction,double Accuracy,double Pause,int Burst,double Sight,double Turn,double Memory,int Damage);
 public enum Team {T,CT}
 
 public sealed partial class Combat
 {
     public static readonly BotSkill[] BotSkills={
-        new("Лёгкая",.65,.25,1.2,3,1600,2.8,3,12),
-        new("Обычная",.4,.42,.8,4,2000,4,5,18),
-        new("Сложная",.25,.6,.55,5,2400,5,7,22),
-        new("Эксперт",.18,.75,.35,6,2800,6,9,26)
+        new("Лёгкая","Easy",.65,.25,1.2,3,1600,2.8,3,12),
+        new("Обычная","Normal",.4,.42,.8,4,2000,4,5,18),
+        new("Сложная","Hard",.25,.6,.55,5,2400,5,7,22),
+        new("Эксперт","Expert",.18,.75,.35,6,2800,6,9,26)
     };
     public bool Rounds {get;}
     public int Difficulty {get;private set;}
@@ -22,7 +22,8 @@ public sealed partial class Combat
     public int RoundNumber {get;private set;}
     public int TWins {get;private set;}
     public int CtWins {get;private set;}
-    public string RoundResult {get;private set;}="";
+    private UiMessage roundResult=UiMessage.Empty;
+    public string RoundResult=>roundResult.In(Language);
     private double freezeEnds,roundEnds,resultEnds;
     public double FreezeRemaining=>Rounds?Math.Max(0,freezeEnds-Time):0;
     public const double RoundDuration=300;
@@ -48,7 +49,7 @@ public sealed partial class Combat
             bot.WeaponId=bot.IsCt?"m4a1":"ak47";
         }
         RestartRound(player,true);
-        Show($"Вы за {team}. Составы выровнены: 5 на 5. B — покупка");
+        Show($"Вы за {team}. Составы выровнены: 5 на 5. B — покупка",$"You joined {team}. Teams balanced to 5 vs 5. B — buy");
     }
     private V lastEye;
     private double lastYaw;
@@ -57,7 +58,7 @@ public sealed partial class Combat
     private readonly List<DropView> drops=new();
     private readonly HashSet<int> ownDropsUnderfoot=new();
     public IReadOnlyList<DropView> Drops=>drops;
-    public void SetDifficulty(int level){Difficulty=Compat.Clamp(level,0,3);Show("Сложность: "+BotSkills[Difficulty].Name);}
+    public void SetDifficulty(int level){Difficulty=Compat.Clamp(level,0,3);Show("Сложность: "+BotSkills[Difficulty].Name,"Difficulty: "+BotSkills[Difficulty].EnglishName);}
     public void ToggleScope()
     {
         if(Dead||MenuOpen||reloadEnds>Time)return;
@@ -76,7 +77,7 @@ public sealed partial class Combat
         }
         if(manual||RoundNumber==0)Money=16000;
         Health=100;Scoped=false;CloseMenu();reloadEnds=0;lastShot=-100;hitUntil=0;effects.Clear();drops.Clear();ownDropsUnderfoot.Clear();feed.Clear();
-        freezeEnds=Time+3;roundEnds=freezeEnds+RoundDuration;resultEnds=0;RoundResult="";RoundNumber++;aiAccumulator=0;handling.Reset();
+        freezeEnds=Time+3;roundEnds=freezeEnds+RoundDuration;resultEnds=0;roundResult=UiMessage.Empty;RoundNumber++;aiAccumulator=0;handling.Reset();
         nextShot=freezeEnds;Observer.Reset();DeathScene.Reset();requestedTeam=null;
         var playerSpawns=PlayerTeam==Team.CT?scene.CounterSpawns:scene.TerroristSpawns;
         player.Place(scene,playerSpawns[Math.Min(4,playerSpawns.Length-1)],PlayerTeam==Team.CT?Math.PI:Math.PI/2+4*Math.PI/180);
@@ -88,7 +89,7 @@ public sealed partial class Combat
             bot.NextShot=freezeEnds+.5;bot.ReloadUntil=0;bot.Magazine=30;bot.ReserveAmmo=90;
             bot.Heading=bot.IsCt?Math.PI:0;
         }
-        Show($"Раунд {RoundNumber}. Подготовка 3 с. B — покупка, H — сложность");
+        Show($"Раунд {RoundNumber}. Подготовка 3 с. B — покупка, H — сложность",$"Round {RoundNumber}. Starts in 3 s. B — buy, H — difficulty");
     }
     private void UpdateRound(Player player)
     {
@@ -97,7 +98,7 @@ public sealed partial class Combat
         int ct=Bots.Count(b=>b.IsCt&&b.Alive)+(!Dead&&PlayerTeam==Team.CT?1:0),t=Bots.Count(b=>!b.IsCt&&b.Alive)+(!Dead&&PlayerTeam==Team.T?1:0);
         if(ct>0&&t>0&&Time<roundEnds)return;
         bool tWins=ct==0&&t>0,draw=ct==0&&t==0;
-        RoundResult=draw?"НИЧЬЯ":tWins?"ПОБЕДА T":"ПОБЕДА CT";
+        roundResult=draw?new("НИЧЬЯ","DRAW"):tWins?new("ПОБЕДА T","TERRORISTS WIN"):new("ПОБЕДА CT","COUNTER-TERRORISTS WIN");
         if(!draw){if(tWins)TWins++;else CtWins++;bool playerWon=tWins==(PlayerTeam==Team.T);Money=Math.Min(16000,Money+(playerWon?3250:1400));}
         resultEnds=Time+5;Scoped=false;CloseMenu();player.StopMotion();
     }
@@ -148,7 +149,7 @@ public sealed partial class Combat
             if(occupied==drop.Weapon)continue;
             if(occupied.Length>0)DropOwned(occupied,lastEye,lastYaw,1.2);
             magazines[spec.Id]=drop.Magazine;reserves[spec.Rule.Ammo.Id]=Math.Min(spec.Rule.Ammo.Limit,ReserveFor(spec)+drop.Reserve);
-            Acquire(spec);if(autoEquip)Equip(spec,false);drops.Remove(drop);ownDropsUnderfoot.Remove(drop.Id);Show("Подобрано: "+spec.Name);return true;
+            Acquire(spec);if(autoEquip)Equip(spec,false);drops.Remove(drop);ownDropsUnderfoot.Remove(drop.Id);Show("Подобрано: "+spec.Name,"Picked up "+spec.Name);return true;
         }
         return false;
     }
@@ -160,18 +161,22 @@ public sealed class Spectator
 {
     public SpectatorMode Mode {get;private set;}
     public CameraPose Camera {get;private set;}
-    public string TargetName {get;private set;}="";
+    private bool targetIsCt,hasObserved;
+    public string TargetName=>NameIn(UiLanguage.Russian);
+    internal string NameIn(UiLanguage language)=>targetId!=0?language.BotName(targetIsCt,targetId):
+        hasObserved?language.Pick("Нет живых игроков","No players alive"):"";
     public double RestartProgress=>Compat.Clamp(spaceTime/1.2,0,1);
     private int targetId;
     private double yaw,pitch,spaceTime;
     private bool spaceDown,fireDown,aimDown,waitSpaceUp;
-    public void Reset(){Mode=SpectatorMode.Chase;spaceTime=0;spaceDown=false;waitSpaceUp=true;targetId=0;fireDown=false;aimDown=false;}
+    public void Reset(){Mode=SpectatorMode.Chase;spaceTime=0;spaceDown=false;waitSpaceUp=true;targetId=0;hasObserved=false;fireDown=false;aimDown=false;}
     public void Begin(CameraPose camera,List<Combat.Bot> bots){Reset();Camera=camera;yaw=camera.Yaw;pitch=.15;Choose(bots,1);}
     private void Choose(List<Combat.Bot> bots,int direction)
     {
-        var alive=bots.Where(b=>b.Alive).ToArray();if(alive.Length==0){targetId=0;TargetName="Нет живых игроков";return;}
+        hasObserved=true;
+        var alive=bots.Where(b=>b.Alive).ToArray();if(alive.Length==0){targetId=0;return;}
         int index=Array.FindIndex(alive,b=>b.Id==targetId);index=(index+direction+alive.Length)%alive.Length;
-        targetId=alive[index].Id;TargetName=$"{(alive[index].IsCt?"CT":"T")} — Бот {targetId:00}";
+        targetId=alive[index].Id;targetIsCt=alive[index].IsCt;
     }
     public bool Step(Scene scene,List<Combat.Bot> bots,Player player,double dt,GameInput input,bool allowViewChange=true)
     {

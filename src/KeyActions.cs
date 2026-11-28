@@ -5,6 +5,7 @@ namespace CadDustLab;
 public sealed class KeyActions
 {
     public const int NextWeapon=0x1000,PreviousWeapon=0x1001;
+    public const int LanguageKey=0x4c;
     public const int Capacity=64;
     public const double MaximumAgeMs=200;
     private readonly Queue<(int Key,double Time)> pending=new();
@@ -15,7 +16,7 @@ public sealed class KeyActions
     public double LastAgeMs {get;private set;}
     public static double NowMs=>System.Diagnostics.Stopwatch.GetTimestamp()*(1000d/System.Diagnostics.Stopwatch.Frequency);
     public static int Normalize(int key)=>key>=0x60&&key<=0x69?key-0x30:key;
-    public static bool IsAction(int key)=>key is 27 or 0x42 or 0x47 or 0x48 or 0x4d or 0x45 or 0x52 or 0x74 or 0x75 or 0xbc or 0xbe or >=0x30 and <=0x39;
+    public static bool IsAction(int key)=>key is LanguageKey or 27 or 0x42 or 0x47 or 0x48 or 0x4d or 0x45 or 0x52 or 0x74 or 0x75 or 0xbc or 0xbe or >=0x30 and <=0x39;
     private void Add(int key,double time)
     {
         if(pending.Count==Capacity){pending.Dequeue();Overflow++;}

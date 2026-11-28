@@ -9,7 +9,8 @@ public sealed record ActorView(int Id,V Eye,bool IsCt,double WalkPhase,double Fa
 public sealed record Impact(V Position,double Time,bool Blood);
 public sealed record ScoreRow(string Name,bool IsCt,int Kills,int Deaths,bool Dead);
 public sealed record CombatSnapshot(double Time,ActorView[] Actors,Impact[] Effects,WeaponSpec Weapon,int Ammo,double Reload,double Recoil,bool Flash,bool HitMarker,int Health,int Armor,int Kills,int Menu,bool Dead,bool Scoped,string Notice,string[] Feed)
-{public int Money {get;init;}public int Reserve {get;init;}public bool Score {get;init;}public ScoreRow[] Scores {get;init;}=Array.Empty<ScoreRow>();public string[] Owned {get;init;}=Array.Empty<string>();public double WalkPhase {get;init;}public double MoveSpeed {get;init;}
+{public UiLanguage Language {get;init;}
+ public int Money {get;init;}public int Reserve {get;init;}public bool Score {get;init;}public ScoreRow[] Scores {get;init;}=Array.Empty<ScoreRow>();public string[] Owned {get;init;}=Array.Empty<string>();public double WalkPhase {get;init;}public double MoveSpeed {get;init;}
  public DropView[] Drops {get;init;}=Array.Empty<DropView>();public int Difficulty {get;init;}public int ZoomLevel {get;init;}public double Fov {get;init;}=90;
  public bool Rounds {get;init;}public bool Paused {get;init;}public int Round {get;init;}public double Remaining {get;init;}public double Freeze {get;init;}public string RoundResult {get;init;}="";public int TWins {get;init;}public int CtWins {get;init;}
  public int SpectatorMode {get;init;}public string SpectatorName {get;init;}="";public double RestartProgress {get;init;}
@@ -62,7 +63,7 @@ public sealed partial class Combat
     public double BulletSpread=>handling.Spread(Weapon,shotSpeed,shotGrounded,shotCrouched,Scoped);
     public V LastShotDirection {get;private set;}
     private readonly List<Impact> effects=new();
-    private readonly List<(double Time,string Text)> feed=new();
+    private readonly List<(double Time,UiMessage Text)> feed=new();
     private readonly Dictionary<string,int> magazines=new();
     private readonly Dictionary<string,int> reserves=new();
     public readonly List<Bot> Bots=new();
@@ -80,12 +81,16 @@ public sealed partial class Combat
     public int Shots {get;private set;}
     public int Hits {get;private set;}
     public int Menu {get;private set;}=-1;
+    public const int LanguageMenu=8;
+    public UiLanguage Language {get;private set;}=UiLanguage.Russian;
     public bool MenuOpen=>Menu>=0;
+    internal bool LanguageMenuInput(GameInput input)=>Menu==LanguageMenu||input.Actions?.Contains(KeyActions.LanguageKey)==true;
     public bool Dead=>Health<=0;
     public bool Scoped {get=>ZoomLevel>0;private set {if(!value)ZoomLevel=0;else if(ZoomLevel==0)ZoomLevel=1;}}
     public double Time {get;private set;}
     private double nextShot,reloadEnds,reloadStart,lastShot=-100,hitUntil,deadAt,aiAccumulator;
-    private string primary="",secondary="glock",notice="B / И — покупка. Деньги и боезапас конечные.";
+    private string primary="",secondary="glock";
+    private UiMessage notice=new("B / И — покупка. Деньги и боезапас конечные.","B — buy. Money and ammo are limited.");
     private double noticeUntil=8;
     public Combat(Scene scene,bool rounds=false)
     {
@@ -102,17 +107,28 @@ public sealed partial class Combat
     public int ReserveFor(WeaponSpec weapon)=>reserves.GetValueOrDefault(weapon.Rule.Ammo.Id);
     public bool Owns(string id)=>id=="knife"||id==primary||id==secondary;
     private bool Spend(int amount)
-    {if(Money<amount){Show("Недостаточно денег");return false;}Money-=amount;return true;}
+    {if(Money<amount){Show("Недостаточно денег","Not enough money");return false;}Money-=amount;return true;}
     public bool BuyAmmo(bool forPrimary)
     {
-        string id=forPrimary?primary:secondary;if(id.Length==0){Show("Сначала купите оружие");return false;}
+        string id=forPrimary?primary:secondary;if(id.Length==0){Show("Сначала купите оружие","Buy a weapon first");return false;}
         var spec=Catalog.First(w=>w.Id==id).Rule.Ammo;int current=reserves[spec.Id];
-        if(current>=spec.Limit){Show("Запас патронов полный");return false;}
+        if(current>=spec.Limit){Show("Запас патронов полный","Ammo reserve is full");return false;}
         if(!Spend(spec.Price))return false;
-        int amount=Math.Min(spec.Pack,spec.Limit-current);reserves[spec.Id]+=amount;Show($"Куплено патронов: {amount} за {spec.Price} $");return true;
+        int amount=Math.Min(spec.Pack,spec.Limit-current);reserves[spec.Id]+=amount;Show($"Куплено патронов: {amount} за {spec.Price} $",$"Bought {amount} rounds for ${spec.Price}");return true;
     }
     public void Handle(int key)
     {
+        if(key==KeyActions.LanguageKey){Menu=Menu==LanguageMenu?-1:LanguageMenu;return;}
+        if(Menu==LanguageMenu)
+        {
+            switch(key)
+            {
+                case 0x31: Language=UiLanguage.Russian;CloseMenu();break;
+                case 0x32: Language=UiLanguage.English;CloseMenu();break;
+                case 27: case 0x30: CloseMenu();break;
+            }
+            return;
+        }
         if(key==0x4d){Menu=Menu==7?-1:7;Scoped=false;return;}
         if(Menu==7)
         {
@@ -130,9 +146,9 @@ public sealed partial class Combat
         {
             int digit=key-0x30;if(digit<0||digit>9)return;
             if(digit==0){Menu=Menu==0?-1:0;return;}
-            if(Menu==0){if(digit<=5)Menu=digit;else if(digit is 6 or 7)BuyAmmo(digit==6);else if(digit==8){if(Armor==100)Show("Броня уже полная");else if(Spend(650)){Armor=100;Show("Куплен бронежилет: 650 $");Menu=-1;}}return;}
+            if(Menu==0){if(digit<=5)Menu=digit;else if(digit is 6 or 7)BuyAmmo(digit==6);else if(digit==8){if(Armor==100)Show("Броня уже полная","Armor is already full");else if(Spend(650)){Armor=100;Show("Куплен бронежилет: 650 $","Bought Kevlar for $650");Menu=-1;}}return;}
             var choice=Catalog.FirstOrDefault(w=>w.Category==Menu&&w.MenuSlot==digit);
-            if(choice is not null){if(Buy(choice))Menu=-1;}else Show("Такого пункта нет. 0 — назад, B — закрыть");return;
+            if(choice is not null){if(Buy(choice))Menu=-1;}else Show("Такого пункта нет. 0 — назад, B — закрыть","Invalid choice. 0 — back, B — close");return;
         }
         if(key==0x52)Reload();
         if(key==0x47)DropCurrent();
@@ -145,9 +161,9 @@ public sealed partial class Combat
     {
         if(Dead||MenuOpen)return;
         string id=slot switch{1=>primary,2=>secondary,3=>"knife",_=>""};
-        if(id.Length==0){Show(slot==4?"4 — Гранат пока нет":$"{slot} — Слот пуст. B — покупка");return;}
+        if(id.Length==0){Show(slot==4?"4 — Гранат пока нет":$"{slot} — Слот пуст. B — покупка",slot==4?"4 — No grenades available":$"{slot} — Empty slot. B — buy");return;}
         var spec=Catalog.First(w=>w.Id==id);if(Weapon.Id!=id)Equip(spec,false);
-        Show($"{slot} — {spec.Name}");
+        Show($"{slot} — {spec.Name}",$"{slot} — {spec.Name}");
     }
     public void CycleWeapon(int direction)
     {
@@ -161,7 +177,7 @@ public sealed partial class Combat
     public bool Buy(WeaponSpec weapon)
     {
         if(Dead)return false;
-        if(Owns(weapon.Id)){Show("Это оружие уже есть");return false;}
+        if(Owns(weapon.Id)){Show("Это оружие уже есть","You already own this weapon");return false;}
         if(!Spend(weapon.Price))return false;
         string previous=weapon.Category==1?secondary:primary;
         if(previous.Length>0)DropOwned(previous,lastEye,lastYaw,0);
@@ -170,29 +186,30 @@ public sealed partial class Combat
     private void Equip(WeaponSpec weapon,bool buy)
     {
         Weapon=weapon;handling.Reset();reloadEnds=0;Scoped=false;nextShot=Time+.12;
-        if(buy){Acquire(weapon);magazines[weapon.Id]=weapon.Magazine;Show($"Куплено: {weapon.Name} за {weapon.Price} $");}
+        if(buy){Acquire(weapon);magazines[weapon.Id]=weapon.Magazine;Show($"Куплено: {weapon.Name} за {weapon.Price} $",$"Bought {weapon.Name} for ${weapon.Price}");}
     }
-    private void Show(string text){notice=text;noticeUntil=Time+3;}
+    private void Show(string russian,string english){notice=new(russian,english);noticeUntil=Time+3;}
     public void Reload()
     {
         if(Dead||reloadEnds>Time||Ammo==Weapon.Magazine||Weapon.Shape=="knife")return;
-        if(Reserve==0){Show("Нет запасных патронов. B–6 / B–7 — купить");return;}
+        if(Reserve==0){Show("Нет запасных патронов. B–6 / B–7 — купить","No spare ammo. B–6 / B–7 — buy");return;}
         reloadStart=Time;reloadEnds=Time+Weapon.Reload;Scoped=false;handling.ClearAccuracy();
     }
     public void Step(double dt,Player player,GameInput input)
     {
         dt=Compat.Clamp(dt,0,.08);Time+=dt;score=input.Score;walkPhase=player.WalkPhase;moveSpeed=player.Grounded?player.Speed:0;lastEye=player.Eye;lastYaw=player.Yaw;
         shotSpeed=player.Speed;shotGrounded=player.Grounded;shotCrouched=player.Crouched;lastCrouched=player.Crouched;handling.Step(Weapon,dt);
+        bool choosingLanguage=LanguageMenuInput(input);
         if(input.Actions is not null)foreach(int key in input.Actions)Handle(key);
         if(requestedTeam is { } team){requestedTeam=null;ChangeTeam(team,player);return;}
         if(reloadEnds>0&&Time>=reloadEnds){int amount=Math.Min(Weapon.Magazine-Ammo,Reserve);magazines[Weapon.Id]+=amount;reserves[Weapon.Rule.Ammo.Id]-=amount;reloadEnds=0;}
         if(Dead)
         {
             DeathScene.Step(scene,dt);
-            if(Rounds){if(!MenuOpen&&Observer.Step(scene,Bots,player,dt,input,!DeathScene.Active)){RestartRound(player,true);return;}}
-            else if(Time-deadAt>3){Health=100;Armor=0;handling.Reset();DeathScene.Reset();player.Reset(scene);primary="";secondary="glock";Weapon=Catalog[0];foreach(var key in reserves.Keys.ToArray())reserves[key]=0;reserves["9mm"]=40;magazines["glock"]=20;reloadEnds=0;nextShot=Time+.5;Show("Вы вернулись. B / И — покупка");}
+            if(Rounds){if(!choosingLanguage&&!MenuOpen&&Observer.Step(scene,Bots,player,dt,input,!DeathScene.Active)){RestartRound(player,true);return;}}
+            else if(Time-deadAt>3){Health=100;Armor=0;handling.Reset();DeathScene.Reset();player.Reset(scene);primary="";secondary="glock";Weapon=Catalog[0];foreach(var key in reserves.Keys.ToArray())reserves[key]=0;reserves["9mm"]=40;magazines["glock"]=20;reloadEnds=0;nextShot=Time+.5;Show("Вы вернулись. B / И — покупка","You respawned. B — buy");}
         }
-        else if(!MenuOpen)
+        else if(!choosingLanguage&&!MenuOpen)
         {
             if(input.Aim)ToggleScope();
             if(input.Fire&&CanFight)Fire(player.Camera);
@@ -252,8 +269,8 @@ public sealed partial class Combat
         if(bot.Alive)return;
         bot.DeadAt=Time;bot.Deaths++;
         AddDrop(bot.WeaponId,bot.Eye,bot.Heading,bot.Magazine,bot.ReserveAmmo,0);
-        if(player){Kills++;Money=Math.Min(16000,Money+300);feed.Add((Time,$"Вы  >  {(bot.IsCt?"CT":"T")} {bot.Id:00}  [{Weapon.Name}]"));}
-        else feed.Add((Time,$"{(bot.IsCt?"T":"CT")} BOT  >  {(bot.IsCt?"CT":"T")} {bot.Id:00}"));
+        if(player){Kills++;Money=Math.Min(16000,Money+300);string target=$"{(bot.IsCt?"CT":"T")} {bot.Id:00}  [{Weapon.Name}]";feed.Add((Time,new("Вы  >  "+target,"You  >  "+target)));}
+        else {string entry=$"{(bot.IsCt?"T":"CT")} BOT  >  {(bot.IsCt?"CT":"T")} {bot.Id:00}";feed.Add((Time,new(entry,entry)));}
         if(feed.Count>4)feed.RemoveAt(0);
     }
     private static readonly V[] Goals={new(1152,2640,160),new(-1850,2300,64),new(-384,1200,0),new(1400,1400,64),new(-1600,500,64),new(-832,-704,192),new(448,2464,-64)};
@@ -314,7 +331,7 @@ public sealed partial class Combat
                         else if(!MenuOpen)
                         {
                             bool alive=!Dead;HurtPlayer(skill.Damage,player);
-                            if(alive&&Dead){bot.Kills++;feed.Add((Time,$"{(bot.IsCt?"CT":"T")} {bot.Id:00}  >  Вы"));}
+                            if(alive&&Dead){bot.Kills++;string killer=$"{(bot.IsCt?"CT":"T")} {bot.Id:00}";feed.Add((Time,new(killer+"  >  Вы",killer+"  >  You")));}
                         }
                     }
                 }
@@ -387,13 +404,13 @@ public sealed partial class Combat
         foreach(var b in Bots)yield return new(b.Id,b.Eye,b.IsCt,b.WalkPhase,b.Alive?0:Compat.Clamp((Time-b.DeadAt)/.55,0,1),b.Alive&&b.HitUntil>Time){Heading=b.Heading,Speed=b.Speed};
         if(Dead&&DeathScene.HasBody)yield return DeathScene.Body;
     }
-    public CombatSnapshot Snapshot()=>new(Time,ActorViews().ToArray(),effects.ToArray(),Weapon,Ammo,reloadEnds>Time?(Time-reloadStart)/Weapon.Reload:0,Math.Max(0,1-(Time-lastShot)/.13),Time-lastShot<.075,Time<hitUntil,Health,Armor,Kills,Menu,Dead,Scoped,Time<noticeUntil?notice:"",feed.Select(f=>f.Text).ToArray())
+    public CombatSnapshot Snapshot()=>new(Time,ActorViews().ToArray(),effects.ToArray(),Weapon,Ammo,reloadEnds>Time?(Time-reloadStart)/Weapon.Reload:0,Math.Max(0,1-(Time-lastShot)/.13),Time-lastShot<.075,Time<hitUntil,Health,Armor,Kills,Menu,Dead,Scoped,Time<noticeUntil?notice.In(Language):"",feed.Select(f=>f.Text.In(Language)).ToArray())
     {
-        Money=Money,Reserve=Reserve,Score=score,WalkPhase=walkPhase,MoveSpeed=moveSpeed,
+        Language=Language,Money=Money,Reserve=Reserve,Score=score&&Menu!=LanguageMenu,WalkPhase=walkPhase,MoveSpeed=moveSpeed,
         Drops=drops.ToArray(),Difficulty=Difficulty,ZoomLevel=ZoomLevel,Fov=Fov,Spread=BulletSpread,Rounds=Rounds,Round=RoundNumber,Remaining=Remaining,Freeze=FreezeRemaining,RoundResult=RoundResult,TWins=TWins,CtWins=CtWins,
-        SpectatorMode=(int)Observer.Mode,SpectatorName=Observer.TargetName,RestartProgress=Observer.RestartProgress,
+        SpectatorMode=(int)Observer.Mode,SpectatorName=Observer.NameIn(Language),RestartProgress=Observer.RestartProgress,
         DeathCamera=DeathScene.Active,DeathRemaining=DeathScene.Remaining,PlayerTeam=PlayerTeam,
         Owned=new[]{primary,secondary,"knife"},
-        Scores=new[]{new ScoreRow("Вы",PlayerTeam==Team.CT,Kills,Deaths,Dead)}.Concat(Bots.Select(b=>new ScoreRow($"{(b.IsCt?"CT":"T")} — Бот {b.Id:00}",b.IsCt,b.Kills,b.Deaths,!b.Alive))).ToArray()
+        Scores=new[]{new ScoreRow(Language.Pick("Вы","You"),PlayerTeam==Team.CT,Kills,Deaths,Dead)}.Concat(Bots.Select(b=>new ScoreRow(Language.BotName(b.IsCt,b.Id),b.IsCt,b.Kills,b.Deaths,!b.Alive))).ToArray()
     };
 }

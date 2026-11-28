@@ -463,7 +463,11 @@ public sealed class Scene
     {
         var shapes=new List<ScreenPolygon>{new(new[]{new V(-800,-450,0),new V(800,-450,0),new V(800,450,0),new V(-800,450,0)},DraftGeometry.Black)};
         var labels=new List<ScreenLabel>();var strokes=new List<ScreenStroke>();
-        plan.Value.AddTo(shapes,labels,strokes);
+        // CAD draws all text and strokes after the filled polygons. Leave the
+        // map fills behind an open dialog, and keep its annotations out of it.
+        bool annotated=!combat.Score&&combat.Menu<0&&!combat.Paused;
+        plan.Value.AddTo(shapes,labels,strokes,combat.Language);
+        if(!annotated){labels.Clear();strokes.Clear();}
         V P(V p)=>plan.Value.Project(p);
         foreach(var actor in combat.Actors)
         {
@@ -472,11 +476,25 @@ public sealed class Scene
             {
                 var d=new V(Math.Sin(actor.Heading),Math.Cos(actor.Heading),0);var r=new V(d.Y,-d.X,0);
                 shapes.Add(new(new[]{p+d*7,p-d*4+r*4,p-d*4-r*4},DraftGeometry.White));
-                labels.Add(new(p+new V(9,3,90),$"{(actor.IsCt?"CT":"T")}{actor.Id:00}",13,DraftGeometry.White));
+                if(annotated)
+                {
+                    // At team spawns several markers can share a line of text.
+                    var pos=p+new V(9,3,90);
+                    for(int slot=0;slot<=combat.Actors.Length*2;slot++)
+                    {
+                        double y=pos.Y+(slot%2==0?slot/2:-(slot+1)/2)*18;
+                        if(y < -200||y>316)continue;
+                        if(labels.Any(l=>l.Position.X<pos.X+46&&l.Position.X+l.Text.Length*l.Height>pos.X
+                            &&l.Position.Y<y+16&&l.Position.Y+l.Height+2>y))continue;
+                        if(slot!=0)strokes.Add(new(new[]{p,new V(pos.X-2,y+5,85)},Color:0x999999));
+                        labels.Add(new(new(pos.X,y,90),$"{(actor.IsCt?"CT":"T")}{actor.Id:00}",13,DraftGeometry.White));
+                        break;
+                    }
+                }
             }
             else {DraftGeometry.AddLine(shapes,p-new V(3,3,0),p+new V(3,3,0),0x777777,1);DraftGeometry.AddLine(shapes,p-new V(-3,3,0),p+new V(-3,3,0),0x777777,1);}
         }
-        labels.Add(new(new(-750,352,90),"ПЛАН DUST 2 | НАБЛЮДЕНИЕ",24,DraftGeometry.White));
+        if(annotated)labels.Add(new(new(-750,352,90),combat.Language.Pick("ПЛАН DUST 2 | НАБЛЮДЕНИЕ","DUST 2 MAP | SPECTATING"),24,DraftGeometry.White));
         GameDrawing.Draw(shapes,combat,labels,strokes,true);
         return new(shapes,new(),faces.Count,0){Labels=labels,Strokes=strokes};
     }

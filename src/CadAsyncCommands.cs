@@ -14,8 +14,8 @@ namespace CadDustLab;
 public class Commands
 {
     private static Walk? walk;
-    private const string CommandGroup="CS16_V101";
-    [CommandMethod(CommandGroup,"CS16STOP101",CommandFlags.Modal)] public void DraftStop()=>Stop();
+    private const string CommandGroup="CS16_V110";
+    [CommandMethod(CommandGroup,"CS16STOP110",CommandFlags.Modal)] public void DraftStop()=>Stop();
     private static IEnumerable<Type> LegacyTypes=>AppDomain.CurrentDomain.GetAssemblies().Where(a=>a.GetName().Name is "CadDustCompat24" or "CadDustCompat23" or "CadDustCompat22" or "CadDustCompat21" or "CadDustCompat20" or "CadDustRound19" or "CadDustRound18" or "CadDustRound17" or "CadDustRound16" or "CadDustRound15" or "CadDustDraft14" or "CadDustPolish13").Select(a=>a.GetType("CadDustLab.Commands")!);
     private static Type? LegacyType=>LegacyTypes.FirstOrDefault(t=>t.GetField("walk",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static)?.GetValue(null) is not null);
     private static bool LegacyActive=>LegacyType?.GetField("walk",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static)?.GetValue(null) is not null;
@@ -23,7 +23,7 @@ public class Commands
     [CommandMethod(CommandGroup,"DUSTWALK",CommandFlags.Modal)] public void Start(){if(walk is null&&LegacyActive)Legacy("Start");else Launch(false,true);}
     [CommandMethod(CommandGroup,"DUSTPLAY",CommandFlags.Modal)] public void Play(){if(walk is null&&LegacyActive)Legacy("Play");else Launch(true,true);}
     [CommandMethod(CommandGroup,"CS16",CommandFlags.Modal)] public void CombatVersion()=>Launch(true,true);
-    [CommandMethod(CommandGroup,"CS16V101",CommandFlags.Modal)] public void CompatibleVersion()=>Launch(true,true);
+    [CommandMethod(CommandGroup,"CS16V110",CommandFlags.Modal)] public void CompatibleVersion()=>Launch(true,true);
     [CommandMethod(CommandGroup,"CS16ROLLBACK19",CommandFlags.Modal)] public void Rollback19()
     {
         var old=LegacyTypes.FirstOrDefault(t=>t.Assembly.GetName().Name=="CadDustRound19");
@@ -51,7 +51,7 @@ public class Commands
         catch(System.Exception ex)
         {
             try{File.WriteAllText(Path.Combine(HostCompatibility.LogDirectory,"startup.error.txt"),ex.ToString());}catch(IOException){}catch(UnauthorizedAccessException){}
-            Acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nCS16 start failed: "+ex.Message+". Details: %LOCALAPPDATA%/CS16/logs/v1.0.1.\n");
+            Acad.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nCS16 start failed: "+ex.Message+". Details: %LOCALAPPDATA%/CS16/logs/v1.1.0.\n");
         }
     }
     [CommandMethod(CommandGroup,"DUSTSTOP",CommandFlags.Modal)] public void Stop(){walk?.Dispose();walk=null;Legacy("Stop");}
@@ -206,7 +206,7 @@ internal sealed class Walk:IDisposable
             Acad.SetSystemVariable("GRIDMODE",0);Acad.SetSystemVariable("CURSORSIZE",1);Acad.SetSystemVariable("UCSICON",0);Acad.SetSystemVariable("LWDISPLAY",(short)1);
             Overrule.AddOverrule(RXObject.GetClass(typeof(Polyline)),painter,false);registered=true;Overrule.Overruling=true;
             painter.Replace(Prepare(new(0,0,player?.Camera,Stopwatch.GetTimestamp(),combat is null?null:combat.Snapshot() with{Paused=true})).Batch);
-            if(player is not null)painter.HudText="УПРАВЛЕНИЕ AUTOCAD | F6 — войти в игру | DUSTSTOP — закрыть игру";
+            if(combat is not null)painter.HudText=combat.Language.Hud(false);
             added=TransientManager.CurrentTransientManager.AddTransient(anchor,TransientDrawingMode.DirectShortTerm,129,viewports);
             if(!added)throw new InvalidOperationException("AutoCAD rejected the transient drawable");
             worker=new(Prepare);timer.Tick+=Tick;
@@ -214,7 +214,7 @@ internal sealed class Walk:IDisposable
             if(player is not null)
             {
                 input=new InputCapture(doc.Window.Handle){Diagnostics=diagnostics};requestCapture=false;
-                doc.Editor.WriteMessage("\nCS16: F6 capture/release. WASD run, Shift walk, Space jump, Ctrl duck, B buy, H difficulty, G drop, E swap, RMB scope. Esc releases, hold Esc exits menus. DUSTSTOP restores drawing.\n");
+                doc.Editor.WriteMessage("\nCS16: F6 capture/release. WASD run, Shift walk, Space jump, Ctrl duck, B buy, H difficulty, G drop, E swap, RMB scope. L then 1/2 changes language. Esc closes menus, hold Esc to release controls. DUSTSTOP restores drawing.\n");
             }
             else doc.Editor.WriteMessage("\nDUSTWALK: 44-second automatic walk. DUSTPAUSE pauses, DUSTSTOP restores view.\n");
             pulse=new(diagnostics,()=>Tick(null,EventArgs.Empty)){DrivesFrames=posted};
@@ -266,9 +266,10 @@ internal sealed class Walk:IDisposable
                 if(active)
                 {
                     using var movement=diagnostics.Measure("collision_camera");
-                    if(keys.Actions?.Contains(0x74)==true){combat?.RestartRound(player,true);camera.Reset();generation++;}
-                    if(combat is {Dead:false,MenuOpen:false})player.Look(keys.Dx*combat.MouseScale,keys.Dy*combat.MouseScale);
-                    if(combat is {CanMove:true})
+                    bool choosingLanguage=combat?.LanguageMenuInput(keys)==true;
+                    if(!choosingLanguage&&keys.Actions?.Contains(0x74)==true){combat?.RestartRound(player,true);camera.Reset();generation++;}
+                    if(!choosingLanguage&&combat is {Dead:false,MenuOpen:false})player.Look(keys.Dx*combat.MouseScale,keys.Dy*combat.MouseScale);
+                    if(!choosingLanguage&&combat is {CanMove:true})
                     {
                         player.Move(scene,keys.Forward,keys.Strafe,keys.Walk,dt,combat.MaxSpeed,keys.Jump,keys.Duck);
                     }
@@ -279,7 +280,7 @@ internal sealed class Walk:IDisposable
                     input.MenuOpen=combat?.MenuOpen??false;gameTime+=dt;
                     pose=camera.Follow(combat?.RenderCamera(player)??player.Camera,dt);
                 }
-                string hud=active?"ИГРА | F6 / Esc — отпустить мышь | WASD | Shift — шаг | Ctrl — присесть | B — купить | H — сложность | G — бросить":"УПРАВЛЕНИЕ AUTOCAD | F6 — войти в игру | DUSTSTOP — закрыть игру";
+                string hud=combat!.Language.Hud(active);
                 if(painter.HudText!=hud){painter.HudText=hud;changed=true;}
             }
             if(worker?.TakeError() is { } error)throw new InvalidOperationException("Frame preparation failed",error);

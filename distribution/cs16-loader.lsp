@@ -14,9 +14,9 @@
     ((not (setq dll (findfile (strcat bundle "/Contents/" family "/AutoCADCS.dll"))))
       (princ "\nCS16: module missing. Extract the complete CS16.bundle folder.\n"))
     (T
-      (if (not (getcname "CS16V101")) (command "_.NETLOAD" dll))
-      (if (getcname "CS16V101")
-        (command "CS16V101")
+      (if (not (getcname "CS16V110")) (command "_.NETLOAD" dll))
+      (if (getcname "CS16V110")
+        (command "CS16V110")
         (princ "\nCS16: module could not be loaded. See the AutoCAD command history.\n"))))
   (princ))
 (princ)

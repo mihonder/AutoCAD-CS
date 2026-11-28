@@ -1,6 +1,7 @@
 using CadDustLab;
 using System.Text.Json;
 using System.Diagnostics;
+if(args.Length is 1 or 2&&args[0]=="--language"){LanguageChecks.Run(args.Length==2?args[1]:null);return;}
 if(args.Length==1&&args[0]=="--compat"){CompatibilityChecks.Run();return;}
 if(args.Length==1&&args[0]=="--input"){InputChecks.Run();return;}
 if(args.Length==1&&args[0]=="--freeze"){FreezeChecks.Run(new Scene(File.ReadAllText("../../assets/scene.json"),true));return;}

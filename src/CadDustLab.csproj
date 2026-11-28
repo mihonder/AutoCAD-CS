@@ -6,10 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget><EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AssemblyName>AutoCADCS</AssemblyName>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Title>CS 1.6 for AutoCAD</Title><Product>CS 1.6</Product>
-    <OutputPath>bin/v1.0.1/</OutputPath>
-    <IntermediateOutputPath>obj/v1.0.1/</IntermediateOutputPath>
+    <OutputPath>bin/v1.1.0/</OutputPath>
+    <IntermediateOutputPath>obj/v1.1.0/</IntermediateOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <Compile Include="Scene.cs"/><Compile Include="CadAsyncCommands.cs"/><Compile Include="Player.cs"/><Compile Include="InputCapture.cs"/>
     <Compile Include="LatestWorker.cs"/><Compile Include="VectorBatch.cs"/><Compile Include="CameraSmoother.cs"/>
     <Compile Include="FrameDiagnostics.cs"/>
-    <Compile Include="Combat.cs"/><Compile Include="GameDrawing.cs"/><Compile Include="WeaponHandling.cs"/>
+    <Compile Include="UiLanguage.cs"/><Compile Include="Combat.cs"/><Compile Include="GameDrawing.cs"/><Compile Include="WeaponHandling.cs"/>
     <Compile Include="Skybox.cs"/><Compile Include="Navigation.cs"/><Compile Include="WeaponRules.cs"/><Compile Include="ViewModels.cs"/><Compile Include="KeyActions.cs"/>
     <Compile Include="DraftGeometry.cs"/><Compile Include="ActorSlides.cs"/>
     <Compile Include="RoundPlay.cs"/><Compile Include="DroppedWeapons.cs"/>

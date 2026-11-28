@@ -4,7 +4,7 @@ namespace CadDustLab;
 // never produce game actions. Sampling and consuming synchronize on a short lock.
 internal sealed class PhysicalInput
 {
-    internal static readonly int[] Keys=new[]{0x75,27,0x42,0x48,0x4d,1,2,9,16,17,18,32,0x57,0x41,0x53,0x44,0x52,0x47,0x45,0x74,0xbc,0xbe,0x5b,0x5c}
+    internal static readonly int[] Keys=new[]{0x75,27,0x42,0x48,0x4d,KeyActions.LanguageKey,1,2,9,16,17,18,32,0x57,0x41,0x53,0x44,0x52,0x47,0x45,0x74,0xbc,0xbe,0x5b,0x5c}
         .Concat(Enumerable.Range(0x30,10)).Concat(Enumerable.Range(0x60,10)).ToArray();
     private readonly object gate=new();
     private readonly bool[] down=new bool[256],blocked=new bool[256];

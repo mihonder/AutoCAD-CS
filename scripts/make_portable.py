@@ -4,7 +4,7 @@ import hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BUNDLE = ROOT / "dist" / "v1.0.1" / "CS16.bundle"
+BUNDLE = ROOT / "dist" / "v1.1.0" / "CS16.bundle"
 FAMILIES = ("2020", "2021-2024", "2025-2026", "2027")
 
 def build():
@@ -30,7 +30,7 @@ def build():
         clauses.append(f'((equal family "{family}") (list\n' + "\n".join(entries) + "))")
     payloads = "(defun cs16:payload (family) (cond\n" + "\n".join(clauses) + "\n(T nil)))"
     source = (ROOT / "distribution" / "CS16-portable.lsp").read_text(encoding="utf-8")
-    source = source.replace("@@BUILD_ID@@", "v1.0.1-" + digest.hexdigest()[:16]).replace("@@PAYLOADS@@", payloads)
+    source = source.replace("@@BUILD_ID@@", "v1.1.0-" + digest.hexdigest()[:16]).replace("@@PAYLOADS@@", payloads)
     notices = (ROOT / "distribution" / "THIRD-PARTY.txt").read_text(encoding="utf-8")
     source = "\n".join(";; " + line for line in notices.splitlines()) + "\n" + source
     result = BUNDLE.parent / "CS16.lsp"

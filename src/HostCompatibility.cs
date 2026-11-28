@@ -13,7 +13,7 @@ public sealed class HostCompatibility:IExtensionApplication
     {
         get
         {
-            string path=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CS16","logs","v1.0.1",Major.ToString());
+            string path=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CS16","logs","v1.1.0",Major.ToString());
             Directory.CreateDirectory(path);return path;
         }
     }
@@ -32,7 +32,7 @@ public sealed class HostCompatibility:IExtensionApplication
 #else
 #error Choose an AutoCAD target framework.
 #endif
-    public void Initialize()=>Acad.DocumentManager.MdiActiveDocument?.Editor.WriteMessage("\nCS 1.6 v1.0.1: "+Family+". Command: CS16.\n");
+    public void Initialize()=>Acad.DocumentManager.MdiActiveDocument?.Editor.WriteMessage("\nCS 1.6 v1.1.0: "+Family+". Command: CS16.\n");
     public void Terminate(){ } // Walk releases native state in AutoCAD.BeginQuit.
     internal static bool Check()
     {

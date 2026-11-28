@@ -5,6 +5,7 @@
     <PackageReference Include="System.Text.Json" Version="10.0.14"/>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="../../src/UiLanguage.cs" Link="UiLanguage.cs"/>
     <Compile Include="../../src/Compat.cs" Link="Compat.cs"/>
     <Compile Include="../../src/PhysicalInput.cs" Link="PhysicalInput.cs"/>
     <Compile Include="../../src/WeaponHandling.cs" Link="WeaponHandling.cs"/>

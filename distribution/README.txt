@@ -1,4 +1,4 @@
-CS 1.6 — версия 1.0.1
+CS 1.6 — версия 1.1.0
 AutoCAD 2020–2027, Windows x64. Автор: mihonder.
 
 ЗАПУСК
@@ -20,6 +20,8 @@ WASD — бег; Shift — шаг; Ctrl — присесть; Space — прыг
 B/И — покупка, затем цифры. R — перезарядка.
 G — бросить оружие; E — подобрать.
 H/Р — сложность ботов. M/Ь — команда, боты уравняются.
+L/Д — язык. 1 — русский (при запуске), 2 — English.
+Press F6 to play, then L and 2 for English.
 Tab — счёт. F5 — новый раунд.
 После смерти: короткий Space — сменить наблюдение;
 удержание Space 1,2 с — перезапустить раунд.
@@ -45,8 +47,8 @@ CS16.bundle\Contents\. Сохраняйте соседние DLL вместе.
 
 УДАЛЕНИЕ
 Закройте AutoCAD и удалите добавленный CS16.bundle или CS16.lsp.
-Кэш этой версии: %LOCALAPPDATA%\CS16\portable\v1.0.1-...\.
-Журналы: %LOCALAPPDATA%\CS16\logs\v1.0.1\.
+Кэш этой версии: %LOCALAPPDATA%\CS16\portable\v1.1.0-...\.
+Журналы: %LOCALAPPDATA%\CS16\logs\v1.1.0\.
 
 СООБЩИТЬ ОБ ОШИБКЕ
 https://github.com/mihonder/AutoCAD-CS/issues/new/choose

@@ -5,7 +5,7 @@ namespace CadDustLab;
 public sealed class PlanDrawing
 {
     private readonly List<ScreenPolygon> shapes=new();
-    private readonly List<ScreenLabel> labels=new();
+    private readonly List<ScreenLabel> labels=new(),englishLabels=new();
     private readonly List<ScreenStroke> strokes=new();
     private readonly double centerX,centerY,scale;
     public int HatchCount {get;}
@@ -30,16 +30,22 @@ public sealed class PlanDrawing
             DraftGeometry.AddLine(shapes,Project(new(line[0].GetDouble(),line[1].GetDouble(),0)),Project(new(line[2].GetDouble(),line[3].GetDouble(),0)),0x969696,.65);
             HatchCount++;
         }
+        void Label(V position,string ru,string en,int height,int color)
+        {
+            labels.Add(new(position,ru,height,color));
+            englishLabels.Add(new(position,en,height,color));
+        }
         foreach(var label in data.GetProperty("labels").EnumerateArray())
         {
             var p=Project(new(label[1].GetDouble(),label[2].GetDouble(),0));
-            labels.Add(new(new(p.X-7,p.Y,90),label[0].GetString()!,16,0xa0a0a0));
+            string name=label[0].GetString()!;
+            Label(new(p.X-7,p.Y,90),name,name switch{"МИД"=>"MID","ТН"=>"TN",_=>name},16,0xa0a0a0);
         }
-        labels.Add(new(new(-740,295,90),"СТЕНЫ — ШТРИХОВКА",17,DraftGeometry.White));
-        labels.Add(new(new(-740,265,90),"ПРОХОДЫ — БЕЗ ЗАЛИВКИ",17,DraftGeometry.White));
-        labels.Add(new(new(-740,235,90),"ТН — ТОННЕЛИ",17,DraftGeometry.White));
+        Label(new(-740,295,90),"СТЕНЫ — ШТРИХОВКА","WALLS — HATCHED",17,DraftGeometry.White);
+        Label(new(-740,265,90),"ПРОХОДЫ — БЕЗ ЗАЛИВКИ","PASSAGES — OPEN",17,DraftGeometry.White);
+        Label(new(-740,235,90),"ТН — ТОННЕЛИ","TN — TUNNELS",17,DraftGeometry.White);
     }
     public V Project(V point)=>new((point.X-centerX)*scale,(point.Y-centerY)*scale+65,0);
-    public void AddTo(List<ScreenPolygon> output,List<ScreenLabel> text,List<ScreenStroke> lines)
-    {output.AddRange(shapes);text.AddRange(labels);lines.AddRange(strokes);}
+    public void AddTo(List<ScreenPolygon> output,List<ScreenLabel> text,List<ScreenStroke> lines,UiLanguage language=UiLanguage.Russian)
+    {output.AddRange(shapes);text.AddRange(language==UiLanguage.English?englishLabels:labels);lines.AddRange(strokes);}
 }

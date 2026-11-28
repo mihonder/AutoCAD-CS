@@ -58,18 +58,18 @@
     ((wcmatch (strcase (getvar "PROGRAM")) "*LT*") (princ "\nCS16: AutoCAD LT is not supported.\n"))
     ((not (equal (strcase (getenv "PROCESSOR_ARCHITECTURE")) "AMD64")) (princ "\nCS16: Windows x64 is required.\n"))
     (T
-      (if (not (getcname "CS16V101"))
+      (if (not (getcname "CS16V110"))
         (progn
           (princ "\nCS16: preparing the module for this AutoCAD...\n")
           (setq module (cs16:prepare family))
           (if module (command "_.NETLOAD" module))))
-      (if (getcname "CS16V101")
-        (command "CS16V101")
+      (if (getcname "CS16V110")
+        (command "CS16V110")
         (princ "\nCS16: module was not loaded. See AutoCAD command history.\n"))))
   (princ))
 
 @@PAYLOADS@@
 
 (defun c:CS16 () (cs16:start))
-(princ "\nCS 1.6 v1.0.1 loaded. Type CS16 to start the game.\n")
+(princ "\nCS 1.6 v1.1.0 loaded. Type CS16 to start the game.\n")
 (princ)

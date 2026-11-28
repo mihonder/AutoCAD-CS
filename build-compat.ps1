@@ -12,7 +12,7 @@ try {
         Push-Location tests/preview
         try {
             foreach ($runtime in @('net47','net8.0','net10.0')) {
-                foreach ($mode in @('--input','--freeze','--health','--crouch','--gameplay24','--compat','--rounds','--draft','')) {
+                foreach ($mode in @('--input','--language','--freeze','--health','--crouch','--gameplay24','--compat','--rounds','--draft','')) {
                     Write-Host "Testing $runtime $mode"
                     if ($runtime -eq 'net47') { & './bin/Release/net47/Preview.exe' $mode }
                     elseif ($runtime -eq 'net8.0') { & dotnet './bin/Release/net8.0/Preview.dll' $mode }
@@ -35,12 +35,12 @@ try {
         Push-Location tests/preview
         try {
             foreach ($family in @('2020','2021-2024')) {
-                & './bin/Release/net47/Preview.exe' --module "../../dist/v1.0.1/CS16.bundle/Contents/$family/AutoCADCS.dll"
+                & './bin/Release/net47/Preview.exe' --module "../../dist/v1.1.0/CS16.bundle/Contents/$family/AutoCADCS.dll"
                 if ($LASTEXITCODE) { throw "Packaged Framework module failed: $family" }
             }
-            & dotnet './bin/Release/net8.0/Preview.dll' --module '../../dist/v1.0.1/CS16.bundle/Contents/2025-2026/AutoCADCS.dll'
+            & dotnet './bin/Release/net8.0/Preview.dll' --module '../../dist/v1.1.0/CS16.bundle/Contents/2025-2026/AutoCADCS.dll'
             if ($LASTEXITCODE) { throw 'Packaged .NET 8 module failed' }
-            & $DotNet './bin/Release/net10.0/Preview.dll' --module '../../dist/v1.0.1/CS16.bundle/Contents/2027/AutoCADCS.dll'
+            & $DotNet './bin/Release/net10.0/Preview.dll' --module '../../dist/v1.1.0/CS16.bundle/Contents/2027/AutoCADCS.dll'
             if ($LASTEXITCODE) { throw 'Packaged .NET 10 module failed' }
         } finally { Pop-Location }
     }
